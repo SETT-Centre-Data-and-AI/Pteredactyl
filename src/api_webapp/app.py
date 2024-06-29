@@ -11,68 +11,168 @@ import yaml
 
 import pteredactyl as pt
 
-# Logging configuration. This is only done at root level
-logging_config = yaml.safe_load(Path("logging.yaml").read_text())
-logging.config.dictConfig(logging_config)
+# # Logging configuration. This is only done at root level
+# logging_config = yaml.safe_load(Path("logging.yaml").read_text())
+# logging.config.dictConfig(logging_config)
 
-# Get the logger
-log = logging.getLogger(__name__)
+# # Get the logger
+# log = logging.getLogger(__name__)
 
-# Load the model
-log.info("Starting App")
+# # Load the model
+# log.info("Starting App")
 
-# Function to redact text
-def redact(text: str):
-    anonymized_text = pt.anonymise(text)
-    # Replace < and > with [ and ] to avoid HTML interpretation issues
+
+sample_text = """
+1. Dr. Huntington (Patient No: 1234567890) diagnosed Ms. Alzheimer with Alzheimer's disease during her last visit to the Huntington Medical Center on 12/12/2023. The prognosis was grim, but Dr. Huntington assured Ms. Alzheimer that the facility was well-equipped to handle her condition despite the lack of a cure for Alzheimer's.
+
+2. Paget Brewster (Patient No: 0987654321), a 45-year-old woman, was recently diagnosed with Paget's disease of bone by her physician, Dr. Graves at St. Jenny's Hospital on 01/06/2026 Postcode: JE30 6YN. Paget's disease is a chronic di[PERSON]der that affects bone remodeling, leading to weakened and deformed bones. Brewster's case is not related to Grave's disease, an autoimmune disorder affecting the thyroid gland.
+
+3. Crohn Marshall (Patient No: 943 476 5918), a 28-year-old man, has been battling Crohn's disease for the past five years. Crohn's disease is a type of inflammatory bowel disease (IBD) that causes inflammation of the digestive tract. Marshall's condition is managed by his gastroenterologist, Dr. Ulcerative Colitis, who specializes in treating IBD patients at the Royal Free Hospital.
+
+4. Addison Montgomery (NHS No: 5566778899), a 32-year-old woman, was rushed to University College Hospital on 18/09/2023 after experiencing severe abdominal pain and fatigue. After a series of tests, Dr. Cushing diagnosed Montgomery with Addison's disease, a rare disorder of the adrenal glands. Postcode is NH77 9AF. Montgomery's condition is not related to Cushing's syndrome, which is caused by excessive cortisol production.
+
+5. Lou Gehrig (NHS No: 943 476 5919), a renowned baseball player, was diagnosed with amyotrophic lateral sclerosis (ALS) in 1939 at the Mayo Clinic. ALS, also known as Lou Gehrig's disease, is a progressive neurodegenerative disorder that affects nerve cells in the brain and spinal cord. Gehrig's diagnosis was confirmed by his neurologist, Dr. Bell, who noted that the condition was not related to Bell's palsy, a temporary facial paralysis.
+
+6. Parkinson Brown (Patient No No: 3344556677), a 62-year-old man, has been living with Parkinson's disease for the past decade. Parkinson's disease is a neurodegenerative disorder that affects movement and balance. Brown's condition is managed by his neurologist, Dr. Lewy Body, who noted that Brown's symptoms were not related to Lewy body dementia, another neurodegenerative disorder, at King's College Hospital.
+
+7. Kaposi Sarcoma (Patient No: 9988776655), a 35-year-old man, was recently diagnosed with Kaposi's sarcoma, a type of cancer that develops from the cells that line lymph or blood vessels, at Guy's Hospital on 17/04/2023. Sarcoma's diagnosis was confirmed by his oncologist, Dr. Burkitt Lymphoma, who noted that the condition was not related to Burkitt's lymphoma, an aggressive form of non-Hodgkin's lymphoma. He died on 17/04/2023.
+
+8. Dr. Kawasaki (Patient No No: 2233445566) treated young Henoch Schonlein for Henoch-Schönlein purpura, a rare disorder that causes inflammation of the blood vessels, at Great Ormond Street Hospital on 05/05/2024. Schonlein's case was not related to Kawasaki disease, a condition that primarily affects children and causes inflammation in the walls of medium-sized arteries.
+
+9. Wilson Menkes (NHS No: 943 476 5916), a 42-year-old man, was diagnosed with Wilson's disease, a rare genetic disorder that causes copper to accumulate in the body. Menkes' diagnosis was confirmed by his geneticist, Dr. Niemann Pick, at Addenbrooke's Hospital on 02/02/2025, who noted that the condition was not related to Niemann-Pick disease, another rare genetic disorder that affects lipid storage. Postcode was GH75 3HF.
+
+10. Dr. Marfan (Patient No No: 4455667788) treated Ms. Ehlers Danlos for Ehlers-Danlos syndrome, a group of inherited disorders that affect the connective tissues, at the Royal Brompton Hospital on 30/11/2024. Danlos' case was not related to Marfan syndrome, another genetic disorder that affects connective tissue development and leads to abnormalities in the bones, eyes, and cardiovascular system. Dr Jab's username is: jabba
+"""
+
+# Gold Standard Text
+reference_text = """
+1. [PERSON] (Patient No: [ID]) diagnosed [PERSON] with Alzheimer's disease during her last visit to the [LOCATION] on [DATE_TIME]. The prognosis was grim, but [PERSON] assured [PERSON] that the facility was well-equipped to handle her condition despite the lack of a cure for Alzheimer's.
+
+2. [PERSON] (Patient No: [ID]), a 45-year-old woman, was recently diagnosed with Paget's disease of bone by her physician, [PERSON] at [LOCATION] on [DATE_TIME] Postcode: [POSTCODE]. Paget's disease is a chronic disorder that affects bone remodeling, leading to weakened and deformed bones. [PERSON]'s case is not related to Grave's disease, an autoimmune disorder affecting the thyroid gland.
+
+3. [PERSON] ([LOCATION] No: [NHS_NUMBER]), a 28-year-old man, has been battling Crohn's disease for the past five years. Crohn's disease is a type of inflammatory bowel disease (IBD) that causes inflammation of the digestive tract. [PERSON]'s condition is managed by his gastroenterologist, [PERSON] Ulcerative Colitis, who specializes in treating IBD patients at the [LOCATION].
+
+4. [PERSON] (Patient No: [ID]), a 32-year-old woman, was rushed to [LOCATION] on [DATE_TIME] after experiencing severe abdominal pain and fatigue. After a series of tests, [PERSON] diagnosed [PERSON] with Addison's disease, a rare disorder of the adrenal glands. Postcode is [POSTCODE]. [PERSON]'s condition is not related to Cushing's syndrome, which is caused by excessive cortisol production.
+
+5. [PERSON] ([LOCATION] No: [NHS_NUMBER]), a renowned baseball player, was diagnosed with amyotrophic lateral sclerosis (ALS) in 1939 at the [LOCATION]. ALS, also known as Lou Gehrig's disease, is a progressive neurodegenerative disorder that affects nerve cells in the brain and spinal cord. Gehrig's diagnosis was confirmed by his neurologist, [PERSON], who noted that the condition was not related to Bell's palsy, a temporary facial paralysis.
+
+6. [PERSON] (Patient No: [ID]), a 62-year-old man, has been living with Parkinson's disease for the past decade. Parkinson's disease is a neurodegenerative disorder that affects movement and balance. [PERSON]'s condition is managed by his neurologist, [PERSON], who noted that [PERSON]'s symptoms were not related to Lewy body dementia, another neurodegenerative disorder, at [LOCATION].
+
+7. [PERSON] (Patient No: [ID]), a 35-year-old man, was recently diagnosed with Kaposi's sarcoma, a type of cancer that develops from the cells that line lymph or blood vessels, at [LOCATION] on [DATE_TIME]. Sarcoma's diagnosis was confirmed by his oncologist, [PERSON] Lymphoma, who noted that the condition was not related to Burkitt's lymphoma, an aggressive form of non-Hodgkin's lymphoma. He died on [DATE_TIME].
+
+8. [PERSON] (Patient No: [ID]) treated young Henoch Schonlein for Henoch-Schönlein purpura, a rare disorder that causes inflammation of the blood vessels, at [LOCATION] on [DATE_TIME]. [PERSON]'s case was not related to Kawasaki disease, a condition that primarily affects children and causes inflammation in the walls of medium-sized arteries.
+
+9. [PERSON] ([LOCATION] No: [NHS_NUMBER]), a 42-year-old man, was diagnosed with Wilson's disease, a rare genetic disorder that causes copper to accumulate in the body. [PERSON]'s diagnosis was confirmed by his geneticist, [PERSON], at [LOCATION] on [DATE_TIME], who noted that the condition was not related to Niemann-Pick disease, another rare genetic disorder that affects lipid storage. Postcode was [POSTCODE].
+
+10. [PERSON] (Patient No: [ID]) treated [PERSON] for Ehlers-Danlos syndrome, a group of inherited disorders that affect the connective tissues, at the [LOCATION] on [DATE_TIME]. [PERSON]'s case was not related to Marfan syndrome, another genetic disorder that affects connective tissue development and leads to abnormalities in the bones, eyes, and cardiovascular system. Dr [PERSON]'s username is: [USERNAME]
+"""
+# Function to redact text using a specified model
+def redact(text: str, model_name: str):
+    if model_name == "Stanford":
+        anonymized_text = pt.anonymise(text)  # Stanford model
+    else:
+        anonymized_text = pt.anonymise(text)  # Default to Stanford for now
+
     anonymized_text = anonymized_text.replace("<", "[").replace(">", "]")
     return anonymized_text
 
 
-# Function to manually flag false negatives and count them
-def flag_false_negatives(text: str):
-    false_negatives = {
-        r"\bBrown's\b": "[FALSE_NEGATIVE]Brown's[/FALSE_NEGATIVE]",
-        r"\bKaposi Sarcoma\b": "[FALSE_NEGATIVE]Kaposi Sarcoma[/FALSE_NEGATIVE]",
-        r"\bSarcoma's diagnosis\b": "[FALSE_NEGATIVE]Sarcoma's diagnosis[/FALSE_NEGATIVE]",
-        r"\b[PERSON] Lymphoma\b": "[FALSE_NEGATIVE][PERSON] Lymphoma[/FALSE_NEGATIVE]",
-        r"\bHenoch Schonlein\b": "[FALSE_NEGATIVE]Henoch Schonlein[/FALSE_NEGATIVE]",
-        r"\bGehrig's\b": "[FALSE_NEGATIVE]Gehrig's[/FALSE_NEGATIVE]",
-        r"\bUlcerative Colitis\b": "[FALSE_NEGATIVE]Ulcerative Colitis[/FALSE_NEGATIVE]",
+def extract_tokens(text):
+    tokens = re.findall(r"\[(.*?)\]", text)
+    return tokens
+
+
+def compare_tokens(reference_tokens, redacted_tokens):
+    tp = 0
+    fn = 0
+    fp = 0
+
+    reference_count = {
+        token: reference_tokens.count(token) for token in set(reference_tokens)
     }
+    redacted_count = {
+        token: redacted_tokens.count(token) for token in set(redacted_tokens)
+    }
+
+    for token in reference_count:
+        if token in redacted_count:
+            tp += min(reference_count[token], redacted_count[token])
+            if reference_count[token] > redacted_count[token]:
+                fn += reference_count[token] - redacted_count[token]
+            elif redacted_count[token] > reference_count[token]:
+                fp += redacted_count[token] - reference_count[token]
+        else:
+            fn += reference_count[token]
+
+    for token in redacted_count:
+        if token not in reference_count:
+            fp += redacted_count[token]
+
+    return tp, fn, fp
+
+
+def calculate_true_negatives(total_tokens, total_entities, tp, fn, fp):
+    tn = total_tokens - (total_entities + fp + fn + tp)
+    return tn
+
+
+def count_entities_and_compute_metrics(reference_text: str, redacted_text: str):
+    reference_tokens = extract_tokens(reference_text)
+    redacted_tokens = extract_tokens(redacted_text)
+
+    tp_count, fn_count, fp_count = compare_tokens(reference_tokens, redacted_tokens)
+
+    total_tokens = len(reference_text.split())
+    total_entities = len(reference_tokens)
+    tn_count = calculate_true_negatives(
+        total_tokens, total_entities, tp_count, fn_count, fp_count
+    )
+
+    return tp_count, fn_count, fp_count, tn_count
+
+
+def flag_errors(reference_text: str, redacted_text: str):
     fn_count = 0
-    for original, replacement in false_negatives.items():
-        matches = len(re.findall(original, text))
-        fn_count += matches
-        text = re.sub(original, replacement, text)
-    return text, fn_count
-
-
-# Function to manually flag false positives and count them
-def flag_false_positives(text: str):
-    false_positives = {r"\bdi\[PERSON\]der\b": "di[FALSE_POSITIVE]der[/FALSE_POSITIVE]"}
     fp_count = 0
-    for original, replacement in false_positives.items():
-        matches = len(re.findall(original, text))
-        fp_count += matches
-        text = re.sub(original, replacement, text)
-    return text, fp_count
 
-
-# Function to count true positives
-def count_true_positives(text: str):
-    true_positives = [
-        "[PERSON]",
-        "[ID]",
-        "[GPE]",
-        "[NHS_NUMBER]",
-        "[DATE_TIME]",
-        "[LOCATION]",
-        "[EVENT]",
-        "[POSTCODE]",
+    # Extract tokens with their indices from the reference text
+    reference_tokens = [
+        (match.group(1), match.start())
+        for match in re.finditer(r"\[(.*?)\]", reference_text)
     ]
-    tp_count = sum(text.count(tp) for tp in true_positives)
-    return tp_count
+    redacted_tokens = [
+        (match.group(1), match.start())
+        for match in re.finditer(r"\[(.*?)\]", redacted_text)
+    ]
+
+    reference_set = set(token for token, _ in reference_tokens)
+    redacted_set = set(token for token, _ in redacted_tokens)
+
+    flagged_reference_text = reference_text
+    flagged_redacted_text = redacted_text
+
+    # Flag false negatives (missed redactions)
+    for token, _ in reference_tokens:
+        if token not in redacted_set:
+            fn_count += 1
+            print(f"False Negative Detected: {token}")
+            flagged_reference_text = flagged_reference_text.replace(
+                f"[{token}]", f"[FALSE_NEGATIVE]{token}[/FALSE_NEGATIVE]"
+            )
+
+    # Flag false positives (incorrect redactions)
+    for token, _ in redacted_tokens:
+        if token not in reference_set and token not in [
+            "FALSE_NEGATIVE",
+            "/FALSE_NEGATIVE",
+        ]:
+            fp_count += 1
+            print(f"False Positive Detected: {token}")
+            flagged_redacted_text = flagged_redacted_text.replace(
+                f"[{token}]", f"[FALSE_POSITIVE]{token}[/FALSE_POSITIVE]"
+            )
+
+    return flagged_reference_text, flagged_redacted_text, fn_count, fp_count
 
 
 # Function to visualize the redaction tokens
@@ -86,6 +186,7 @@ def visualize_entities(redacted_text: str):
         "LOCATION": "linear-gradient(90deg, #a1c4fd, #c2e9fb)",
         "EVENT": "linear-gradient(90deg, #a6c0fe, #f68084)",
         "POSTCODE": "linear-gradient(90deg, #c2e59c, #64b3f4)",
+        "USERNAME": "linear-gradient(90deg, #aa9cfc, #fc9ce7)",
         "FALSE_NEGATIVE": "linear-gradient(90deg, #ff6b6b, #ff9a9e)",  # Red for false negatives
         "/FALSE_NEGATIVE": "linear-gradient(90deg, #ff6b6b, #ff9a9e)",  # Red for false negatives
         "FALSE_POSITIVE": "linear-gradient(90deg, #ffcccb, #ff6666)",  # Light red for false positives
@@ -101,6 +202,7 @@ def visualize_entities(redacted_text: str):
         "[DATE_TIME]": "DATE_TIME",
         "[EVENT]": "EVENT",
         "[POSTCODE]": "POSTCODE",
+        "[USERNAME]": "USERNAME",
         "[FALSE_NEGATIVE]": "FALSE_NEGATIVE",
         "[/FALSE_NEGATIVE]": "/FALSE_NEGATIVE",
         "[FALSE_POSITIVE]": "FALSE_POSITIVE",
@@ -146,29 +248,44 @@ def calculate_metrics(tp_count, fn_count, fp_count, tn_count):
     metrics_table = f"""
     <table>
         <tr><th>Metric</th><th>Value</th></tr>
-        <tr><td>Accuracy</td><td>{accuracy:.2f}</td></tr>
-        <tr><td>Precision</td><td>{precision:.2f}</td></tr>
-        <tr><td>Recall</td><td>{recall:.2f}</td></tr>
-        <tr><td>F1 Score</td><td>{f1_score:.2f}</td></tr>
+        <tr><td>Accuracy = (TP+TN) / (TP + FN + FP + TN) </td><td>{accuracy:.2f}</td></tr>
+        <tr><td>Precision = TP / (TP + FP) </td><td>{precision:.2f}</td></tr>
+        <tr><td>Recall = TP / (TP + FN) </td><td>{recall:.2f}</td></tr>
+        <tr><td>F1 Score = 2 * Precision * Recall / (Precision + Recall) </td><td>{f1_score:.2f}</td></tr>
     </table>
     """
     return metrics_table
 
 
-def redact_and_visualize(text: str):
-    total_tokens = len(text.split())
-    redacted_text = redact(text)
-    redacted_text_with_fn, fn_count = flag_false_negatives(redacted_text)
-    redacted_text_with_fn_fp, fp_count = flag_false_positives(redacted_text_with_fn)
-    tp_count = count_true_positives(redacted_text_with_fn_fp) - fp_count
-    tn_count = total_tokens - (
-        tp_count + fn_count + fp_count
-    )  # Calculate true negatives
-    visualized_html = visualize_entities(redacted_text_with_fn_fp)
+def redact_and_visualize(text: str, model_name: str):
+    # Redact the text
+    redacted_text = redact(text, model_name)
+
+    # Flag false positives and false negatives
+    reference_text_with_fn, redacted_text_with_fp, fn_count, fp_count = flag_errors(
+        reference_text, redacted_text
+    )
+
+    # Print the final texts with flags for debugging
+    print("Final Reference Text with False Negatives:")
+    print(reference_text_with_fn)
+    print("\nFinal Redacted Text with False Positives:")
+    print(redacted_text_with_fp)
+
+    # Count entities and compute metrics
+    tp_count, fn_count, fp_count, tn_count = count_entities_and_compute_metrics(
+        reference_text_with_fn, redacted_text_with_fp
+    )
+
+    # Visualize the redacted text
+    visualized_html = visualize_entities(redacted_text_with_fp)
+
+    # Generate confusion matrix and metrics table
     confusion_matrix_plot = generate_confusion_matrix(
         tp_count, fn_count, fp_count, tn_count
     )
     metrics_table = calculate_metrics(tp_count, fn_count, fp_count, tn_count)
+
     return (
         visualized_html,
         f"Total False Negatives: {fn_count}",
@@ -187,7 +304,7 @@ hint = """
 
 When the input text is entered, the tool redacts the entered text with labelled masking tokens.
 
-The model running under the hood is presently: "StanfordAIMI/stanford-deidentifier-base" which can be obtained here: [Link To Stanford Model on Huggingface](https://huggingface.co/StanfordAIMI/stanford-deidentifier-base)
+You can test the text against different models by selecting from the dropdown.
 
 ### Strengths
 - The tool is 99% accurate on our test set of radiology reports.
@@ -195,31 +312,7 @@ The model running under the hood is presently: "StanfordAIMI/stanford-deidentifi
 ### Limitations
 - The tool was not designed initially to redact clinic letters as it was developed primarily on radiology reports.
 
-- It's known significant weaknesses are that it misses postcodes as these were not in its development set.
-
 - It may overly aggressively redact text because it was built as a research tool where precision is prized > recall.
-"""
-
-sample_text = """
-1. Dr. Huntington (NHS No: 1234567890) diagnosed Ms. Alzheimer with Alzheimer's disease during her last visit to the Huntington Medical Center on 12/12/2023. The prognosis was grim, but Dr. Huntington assured Ms. Alzheimer that the facility was well-equipped to handle her condition despite the lack of a cure for Alzheimer's.
-
-2. Paget Brewster (NHS No: 0987654321), a 45-year-old woman, was recently diagnosed with Paget's disease of bone by her physician, Dr. Graves at St. Jenny's Hospital on 01/06/2026 Postcode: JE30 6YN. Paget's disease is a chronic disorder that affects bone remodeling, leading to weakened and deformed bones. Brewster's case is not related to Grave's disease, an autoimmune disorder affecting the thyroid gland.
-
-3. Crohn Marshall (NHS No: 943 476 5918), a 28-year-old man, has been battling Crohn's disease for the past five years. Crohn's disease is a type of inflammatory bowel disease (IBD) that causes inflammation of the digestive tract. Marshall's condition is managed by his gastroenterologist, Dr. Ulcerative Colitis, who specializes in treating IBD patients at the Royal Free Hospital.
-
-4. Addison Montgomery (NHS No: 5566778899), a 32-year-old woman, was rushed to University College Hospital on 18/09/2023 after experiencing severe abdominal pain and fatigue. After a series of tests, Dr. Cushing diagnosed Montgomery with Addison's disease, a rare disorder of the adrenal glands. Postcode is NH77 9AF. Montgomery's condition is not related to Cushing's syndrome, which is caused by excessive cortisol production.
-
-5. Lou Gehrig (NHS No: 943 476 5919), a renowned baseball player, was diagnosed with amyotrophic lateral sclerosis (ALS) in 1939 at the Mayo Clinic. ALS, also known as Lou Gehrig's disease, is a progressive neurodegenerative disorder that affects nerve cells in the brain and spinal cord. Gehrig's diagnosis was confirmed by his neurologist, Dr. Bell, who noted that the condition was not related to Bell's palsy, a temporary facial paralysis.
-
-6. Parkinson Brown (NHS No: 3344556677), a 62-year-old man, has been living with Parkinson's disease for the past decade. Parkinson's disease is a neurodegenerative disorder that affects movement and balance. Brown's condition is managed by his neurologist, Dr. Lewy Body, who noted that Brown's symptoms were not related to Lewy body dementia, another neurodegenerative disorder, at King's College Hospital.
-
-7. Kaposi Sarcoma (NHS No: 9988776655), a 35-year-old man, was recently diagnosed with Kaposi's sarcoma, a type of cancer that develops from the cells that line lymph or blood vessels, at Guy's Hospital on 17/04/2023. Sarcoma's diagnosis was confirmed by his oncologist, Dr. Burkitt Lymphoma, who noted that the condition was not related to Burkitt's lymphoma, an aggressive form of non-Hodgkin's lymphoma. He died on 17/04/2023.
-
-8. Dr. Kawasaki (NHS No: 2233445566) treated young Henoch Schonlein for Henoch-Schönlein purpura, a rare disorder that causes inflammation of the blood vessels, at Great Ormond Street Hospital on 05/05/2024. Schonlein's case was not related to Kawasaki disease, a condition that primarily affects children and causes inflammation in the walls of medium-sized arteries.
-
-9. Wilson Menkes (NHS No: 943 476 5916), a 42-year-old man, was diagnosed with Wilson's disease, a rare genetic disorder that causes copper to accumulate in the body. Menkes' diagnosis was confirmed by his geneticist, Dr. Niemann Pick, at Addenbrooke's Hospital on 02/02/2025, who noted that the condition was not related to Niemann-Pick disease, another rare genetic disorder that affects lipid storage. Postcode was GH75 3HF.
-
-10. Dr. Marfan (NHS No: 4455667788) treated Ms. Ehlers Danlos for Ehlers-Danlos syndrome, a group of inherited disorders that affect the connective tissues, at the Royal Brompton Hospital on 30/11/2024. Danlos' case was not related to Marfan syndrome, another genetic disorder that affects connective tissue development and leads to abnormalities in the bones, eyes, and cardiovascular system.
 """
 
 description = """
@@ -232,7 +325,10 @@ description = """
 
 iface = gr.Interface(
     fn=redact_and_visualize,
-    inputs=gr.Textbox(value=sample_text, label="Input Text", lines=25),
+    inputs=[
+        gr.Textbox(value=sample_text, label="Input Text", lines=25),
+        gr.Dropdown(choices=["Stanford", "Other"], label="Model"),
+    ],
     outputs=[
         gr.HTML(label="Anonymised Text with Visualization"),
         gr.Textbox(label="Total False Negatives", lines=1),
