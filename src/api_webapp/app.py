@@ -67,6 +67,8 @@ reference_text = """
 10. [PERSON] (Patient No: [ID]) treated [PERSON] for Ehlers-Danlos syndrome, a group of inherited disorders that affect the connective tissues, at the [LOCATION] on [DATE_TIME]. [PERSON]'s case was not related to Marfan syndrome, another genetic disorder that affects connective tissue development and leads to abnormalities in the bones, eyes, and cardiovascular system. Dr [PERSON]'s username is: [USERNAME]
 """
 # Function to redact text using a specified model
+
+
 def redact(text: str, model_name: str):
     if model_name == "Stanford":
         change_model("StanfordAIMI/stanford-deidentifier-base")
@@ -80,8 +82,8 @@ def redact(text: str, model_name: str):
         change_model(
             "StanfordAIMI/stanford-deidentifier-base"
         )  # Default to Stanford if model is not recognized
-
-    anonymized_text = pt.anonymise(text)
+    print("Changing_model...")
+    anonymized_text = pt.anonymise(text)  # This should use the updated model
     anonymized_text = anonymized_text.replace("<", "[").replace(">", "]")
     return anonymized_text
 

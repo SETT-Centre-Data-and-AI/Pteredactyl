@@ -1,4 +1,3 @@
-import copy
 import logging
 import random
 from collections.abc import Sequence
@@ -37,37 +36,15 @@ presidio_logger = logging.getLogger("presidio-analyzer")
 
 
 def create_analyser(
-    model_path: str = DEFAULT_NER_MODEL,
+    model_path: str = None,
     spacy_model: str = DEFAULT_SPACY_MODEL,
     language: str = "en",
     regex_entities: Sequence[str | PteredactylRecogniser] = DEFAULT_REGEX_ENTITIES,
 ) -> AnalyzerEngine:
     """
     Create an analyser engine with a Transformers NER model and spaCy model.
-    It is recommended to use this function to create an analyser and pass it
-    to analyse/anonymise functions downstream to be reused, rather than allowing
-    downstream functions to spin up new analyser engines automatically.
-
-    Args:
-        model_path (str): The path to the model used for analysis.
-            Defaults to DEFAULT_NER_MODEL (stanford-deidentifier-base).
-        spacy_model (str): The spaCy model to use.
-            Defaults to DEFAULT_SPACY_MODEL (en_core_web_sm).
-        language (str): The language of the text to be analyzed.
-            Defaults to "en".
-        regex_entities (list, optional): A list of regex entity types to analyze.
-            If not provided, a default list will be used.
-
-    Examples:
-        Create an analyser engine with the default models:
-        > analyser = create_analyser()
-
-        Create an analyser engine with custom models:
-        > `analyser = create_analyser(model_path='StanfordAIMI/stanford-deidentifier-base', spacy_model="en_core_web_lg")`
-
-    Returns:
-        AnalyzerEngine: The analyser engine, which can be passed to analyse(), anonymise(), or anonymise_df().
     """
+    model_path = model_path or DEFAULT_NER_MODEL
 
     if regex_entities:
         regex_entities = build_regex_entity_recogniser_list(
@@ -93,6 +70,25 @@ def create_analyser(
     analyser = AnalyzerEngine(nlp_engine=nlp_engine, registry=registry)
 
     return analyser
+
+
+def redact(text: str, model_name: str):
+    if model_name == "Stanford":
+        change_model("StanfordAIMI/stanford-deidentifier-base")
+    elif model_name == "Stanford with Radiology":
+        change_model(
+            "StanfordAIMI/stanford-deidentifier-with-radiology-reports-and-i2b2"
+        )
+    elif model_name == "Deberta PII":
+        change_model("lakshyakh93/deberta_finetuned_pii")
+    else:
+        change_model(
+            "StanfordAIMI/stanford-deidentifier-base"
+        )  # Default to Stanford if model is not recognized
+
+    anonymized_text = pt.anonymise(text)  # This should use the updated model
+    anonymized_text = anonymized_text.replace("<", "[").replace(">", "]")
+    return anonymized_text
 
 
 def analyse(
