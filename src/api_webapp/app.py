@@ -1,5 +1,6 @@
 import logging
 import logging.config
+import re
 from pathlib import Path
 
 import gradio as gr
@@ -37,13 +38,25 @@ def flag_false_negatives(text: str):
         r"\b[PERSON] Lymphoma\b": "[FALSE_NEGATIVE][PERSON] Lymphoma[/FALSE_NEGATIVE]",
         r"\bHenoch Schonlein\b": "[FALSE_NEGATIVE]Henoch Schonlein[/FALSE_NEGATIVE]",
         r"\bGehrig's\b": "[FALSE_NEGATIVE]Gehrig's[/FALSE_NEGATIVE]",
+        r"\bUlcerative Colitis\b": "[FALSE_NEGATIVE]Ulcerative Colitis[/FALSE_NEGATIVE]",
     }
     fn_count = 0
     for original, replacement in false_negatives.items():
-        if original in text:
-            fn_count += text.count(original)
-            text = text.replace(original, replacement)
+        matches = len(re.findall(original, text))
+        fn_count += matches
+        text = re.sub(original, replacement, text)
     return text, fn_count
+
+
+# Function to manually flag false positives and count them
+def flag_false_positives(text: str):
+    false_positives = {r"\bdi\[PERSON\]der\b": "di[FALSE_POSITIVE]der[/FALSE_POSITIVE]"}
+    fp_count = 0
+    for original, replacement in false_positives.items():
+        matches = len(re.findall(original, text))
+        fp_count += matches
+        text = re.sub(original, replacement, text)
+    return text, fp_count
 
 
 # Function to count true positives
@@ -75,6 +88,8 @@ def visualize_entities(redacted_text: str):
         "POSTCODE": "linear-gradient(90deg, #c2e59c, #64b3f4)",
         "FALSE_NEGATIVE": "linear-gradient(90deg, #ff6b6b, #ff9a9e)",  # Red for false negatives
         "/FALSE_NEGATIVE": "linear-gradient(90deg, #ff6b6b, #ff9a9e)",  # Red for false negatives
+        "FALSE_POSITIVE": "linear-gradient(90deg, #ffcccb, #ff6666)",  # Light red for false positives
+        "/FALSE_POSITIVE": "linear-gradient(90deg, #ffcccb, #ff6666)",  # Light red for false positives
     }
 
     # Map of tokens to color classes
@@ -88,6 +103,8 @@ def visualize_entities(redacted_text: str):
         "[POSTCODE]": "POSTCODE",
         "[FALSE_NEGATIVE]": "FALSE_NEGATIVE",
         "[/FALSE_NEGATIVE]": "/FALSE_NEGATIVE",
+        "[FALSE_POSITIVE]": "FALSE_POSITIVE",
+        "[/FALSE_POSITIVE]": "/FALSE_POSITIVE",
     }
 
     # Function to wrap tokens with span elements without replacing the token
@@ -104,9 +121,11 @@ def visualize_entities(redacted_text: str):
 
 
 # Function to generate confusion matrix
-def generate_confusion_matrix(tp_count, fn_count):
-    # Here, we assume true negatives (TN) and false positives (FP) as zero for simplicity
-    data = {"Actual Positive": [tp_count, fn_count], "Actual Negative": [0, 0]}
+def generate_confusion_matrix(tp_count, fn_count, fp_count, tn_count):
+    data = {
+        "Actual Positive": [tp_count, fn_count],
+        "Actual Negative": [fp_count, tn_count],
+    }
     df = pd.DataFrame(data, index=["Predicted Positive", "Predicted Negative"])
     plt.figure(figsize=(8, 6))
     sns.heatmap(df, annot=True, fmt="d", cmap="Blues")
@@ -117,15 +136,24 @@ def generate_confusion_matrix(tp_count, fn_count):
 
 
 def redact_and_visualize(text: str):
+    total_tokens = len(text.split())
     redacted_text = redact(text)
     redacted_text_with_fn, fn_count = flag_false_negatives(redacted_text)
-    tp_count = count_true_positives(redacted_text_with_fn)
-    visualized_html = visualize_entities(redacted_text_with_fn)
-    confusion_matrix_plot = generate_confusion_matrix(tp_count, fn_count)
+    redacted_text_with_fn_fp, fp_count = flag_false_positives(redacted_text_with_fn)
+    tp_count = count_true_positives(redacted_text_with_fn_fp) - fp_count
+    tn_count = total_tokens - (
+        tp_count + fn_count + fp_count
+    )  # Calculate true negatives
+    visualized_html = visualize_entities(redacted_text_with_fn_fp)
+    confusion_matrix_plot = generate_confusion_matrix(
+        tp_count, fn_count, fp_count, tn_count
+    )
     return (
         visualized_html,
         f"Total False Negatives: {fn_count}",
         f"Total True Positives: {tp_count}",
+        f"Total True Negatives: {tn_count}",
+        f"Total False Positives: {fp_count}",
         confusion_matrix_plot,
     )
 
@@ -187,6 +215,8 @@ iface = gr.Interface(
         gr.HTML(label="Anonymised Text with Visualization"),
         gr.Textbox(label="Total False Negatives", lines=1),
         gr.Textbox(label="Total True Positives", lines=1),
+        gr.Textbox(label="Total True Negatives", lines=1),
+        gr.Textbox(label="Total False Positives", lines=1),
         gr.Plot(label="Confusion Matrix"),
     ],
     title="SETT: Data and AI. Pteredactyl Demo",
