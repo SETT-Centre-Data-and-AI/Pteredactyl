@@ -135,6 +135,26 @@ def generate_confusion_matrix(tp_count, fn_count, fp_count, tn_count):
     return plt
 
 
+# Function to calculate evaluation metrics
+def calculate_metrics(tp_count, fn_count, fp_count, tn_count):
+    accuracy = (tp_count + tn_count) / (tp_count + fn_count + fp_count + tn_count)
+    precision = tp_count / (tp_count + fp_count) if (tp_count + fp_count) > 0 else 0
+    recall = tp_count / (tp_count + fn_count) if (tp_count + fn_count) > 0 else 0
+    f1_score = (
+        2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+    )
+    metrics_table = f"""
+    <table>
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td>Accuracy</td><td>{accuracy:.2f}</td></tr>
+        <tr><td>Precision</td><td>{precision:.2f}</td></tr>
+        <tr><td>Recall</td><td>{recall:.2f}</td></tr>
+        <tr><td>F1 Score</td><td>{f1_score:.2f}</td></tr>
+    </table>
+    """
+    return metrics_table
+
+
 def redact_and_visualize(text: str):
     total_tokens = len(text.split())
     redacted_text = redact(text)
@@ -148,6 +168,7 @@ def redact_and_visualize(text: str):
     confusion_matrix_plot = generate_confusion_matrix(
         tp_count, fn_count, fp_count, tn_count
     )
+    metrics_table = calculate_metrics(tp_count, fn_count, fp_count, tn_count)
     return (
         visualized_html,
         f"Total False Negatives: {fn_count}",
@@ -155,6 +176,7 @@ def redact_and_visualize(text: str):
         f"Total True Negatives: {tn_count}",
         f"Total False Positives: {fp_count}",
         confusion_matrix_plot,
+        metrics_table,
     )
 
 
@@ -218,6 +240,7 @@ iface = gr.Interface(
         gr.Textbox(label="Total True Negatives", lines=1),
         gr.Textbox(label="Total False Positives", lines=1),
         gr.Plot(label="Confusion Matrix"),
+        gr.HTML(label="Evaluation Metrics"),
     ],
     title="SETT: Data and AI. Pteredactyl Demo",
     description=description,
