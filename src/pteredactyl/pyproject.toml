@@ -1,0 +1,46 @@
+[tool.poetry]
+name = "pteredactyl"
+version = "1.0.0"
+description = "Pteredactyl performs free-text redaction and masking of peronally identifiable information (PII) in clinical free text. It can be deployed as an API from a container or as a python module"
+authors = [
+    "Cai Davis", "Michael George", "Matt Stammers"
+]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+presidio-analyzer = "*"
+presidio-anonymizer = "*"
+spacy = "*"
+transformers = "*"
+prompt_toolkit = "3.0.30"
+torch = "*"
+torchaudio = "*"
+torchvision = "*"
+spacy-legacy = "*"
+spacy-loggers = "*"
+tqdm = "*"
+iprogress = "*"
+ipykernel = "*"
+ipywidgets = "*"
+pandas = "*"
+pyyaml = "*"
+
+[tool.poetry.group.dev.dependencies]
+commitizen = "*"
+pytest = "*"
+pytest-cov = "*"
+python-dotenv = "*"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$major.$minor.$patch$prerelease"
+version_type = "pep440"
+version_provider = "poetry"
+update_changelog_on_bump = true
+major_version_zero = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

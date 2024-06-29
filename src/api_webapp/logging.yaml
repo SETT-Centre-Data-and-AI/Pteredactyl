@@ -1,0 +1,33 @@
+version: 1
+formatters:
+    simple:
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: DEBUG
+        formatter: simple
+        stream: ext://sys.stdout
+    log_file:
+        class: logging.handlers.RotatingFileHandler
+        level: INFO
+        filename: "logs/app.log"
+        maxBytes: 1048576 # = 1 mb
+        backupCount: 10
+        formatter: simple
+    # email:
+    #     class: logging.handlers.SMTPHandler
+    #     level: ERROR
+    #     mailhost: ["rhmsmtp1", 25]
+    #     fromaddr: "rhmdasql@uhs.nhs.uk"
+    #     toaddrs: ["pawel.szmajda@uhs.nhs.uk"]
+    #     subject: "A&E Waiting Times CSV Download Error"
+    #     formatter: simple
+root:
+    level: DEBUG
+    handlers: [console, log_file]
+loggers:
+    main:
+        level: INFO
+        handlers: [console, log_file]
+        propagate: no
