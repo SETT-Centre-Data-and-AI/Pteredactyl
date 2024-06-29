@@ -8,4 +8,4 @@ RUN pip install --extra-index-url https://pypi.rds.uhs.nhs.uk/simple/ --trusted-
 
 EXPOSE 7800
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+CMD ["python","app.py"]
