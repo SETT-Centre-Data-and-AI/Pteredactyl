@@ -10,17 +10,17 @@ import seaborn as sns
 import yaml
 
 import pteredactyl as pt
+from pteredactyl.defaults import change_model  # Ensure this import is correct
 
-# # Logging configuration. This is only done at root level
-# logging_config = yaml.safe_load(Path("logging.yaml").read_text())
-# logging.config.dictConfig(logging_config)
+# Logging configuration. This is only done at root level
+logging_config = yaml.safe_load(Path("logging.yaml").read_text())
+logging.config.dictConfig(logging_config)
 
-# # Get the logger
-# log = logging.getLogger(__name__)
+# Get the logger
+log = logging.getLogger(__name__)
 
-# # Load the model
-# log.info("Starting App")
-
+# Load the model
+log.info("Starting App")
 
 sample_text = """
 1. Dr. Huntington (Patient No: 1234567890) diagnosed Ms. Alzheimer with Alzheimer's disease during her last visit to the Huntington Medical Center on 12/12/2023. The prognosis was grim, but Dr. Huntington assured Ms. Alzheimer that the facility was well-equipped to handle her condition despite the lack of a cure for Alzheimer's.
@@ -69,14 +69,24 @@ reference_text = """
 # Function to redact text using a specified model
 def redact(text: str, model_name: str):
     if model_name == "Stanford":
-        anonymized_text = pt.anonymise(text)  # Stanford model
+        change_model("StanfordAIMI/stanford-deidentifier-base")
+    elif model_name == "Stanford with Radiology":
+        change_model(
+            "StanfordAIMI/stanford-deidentifier-with-radiology-reports-and-i2b2"
+        )
+    elif model_name == "Deberta PII":
+        change_model("lakshyakh93/deberta_finetuned_pii")
     else:
-        anonymized_text = pt.anonymise(text)  # Default to Stanford for now
+        change_model(
+            "StanfordAIMI/stanford-deidentifier-base"
+        )  # Default to Stanford if model is not recognized
 
+    anonymized_text = pt.anonymise(text)
     anonymized_text = anonymized_text.replace("<", "[").replace(">", "]")
     return anonymized_text
 
 
+# Rest of the functions remain the same...
 def extract_tokens(text):
     tokens = re.findall(r"\[(.*?)\]", text)
     return tokens
@@ -258,6 +268,8 @@ def calculate_metrics(tp_count, fn_count, fp_count, tn_count):
 
 
 def redact_and_visualize(text: str, model_name: str):
+    total_tokens = len(reference_text.split())
+
     # Redact the text
     redacted_text = redact(text, model_name)
 
@@ -327,7 +339,11 @@ iface = gr.Interface(
     fn=redact_and_visualize,
     inputs=[
         gr.Textbox(value=sample_text, label="Input Text", lines=25),
-        gr.Dropdown(choices=["Stanford", "Other"], label="Model"),
+        gr.Dropdown(
+            choices=["Stanford", "Stanford with Radiology", "Deberta PII", "Other"],
+            label="Model",
+            value="Stanford",
+        ),
     ],
     outputs=[
         gr.HTML(label="Anonymised Text with Visualization"),
@@ -342,5 +358,6 @@ iface = gr.Interface(
     description=description,
     article=hint,
 )
+
 
 iface.launch(server_name="0.0.0.0", server_port=7801)
