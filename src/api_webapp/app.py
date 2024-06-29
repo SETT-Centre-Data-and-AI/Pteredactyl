@@ -3,6 +3,9 @@ import logging.config
 from pathlib import Path
 
 import gradio as gr
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 import yaml
 
 import pteredactyl as pt
@@ -28,19 +31,35 @@ def redact(text: str):
 # Function to manually flag false negatives and count them
 def flag_false_negatives(text: str):
     false_negatives = {
-        "Brown's": "[FALSE_NEGATIVE]Brown's[/FALSE_NEGATIVE]",
-        "Kaposi Sarcoma": "[FALSE_NEGATIVE]Kaposi Sarcoma[/FALSE_NEGATIVE]",
-        "Sarcoma's diagnosis": "[FALSE_NEGATIVE]Sarcoma's diagnosis[/FALSE_NEGATIVE]",
-        "[PERSON] Lymphoma": "[FALSE_NEGATIVE][PERSON] Lymphoma[/FALSE_NEGATIVE]",
-        "Henoch Schonlein": "[FALSE_NEGATIVE]Henoch Schonlein[/FALSE_NEGATIVE]",
-        "Gehrig's": "[FALSE_NEGATIVE]Gehrig's[/FALSE_NEGATIVE]",
+        r"\bBrown's\b": "[FALSE_NEGATIVE]Brown's[/FALSE_NEGATIVE]",
+        r"\bKaposi Sarcoma\b": "[FALSE_NEGATIVE]Kaposi Sarcoma[/FALSE_NEGATIVE]",
+        r"\bSarcoma's diagnosis\b": "[FALSE_NEGATIVE]Sarcoma's diagnosis[/FALSE_NEGATIVE]",
+        r"\b[PERSON] Lymphoma\b": "[FALSE_NEGATIVE][PERSON] Lymphoma[/FALSE_NEGATIVE]",
+        r"\bHenoch Schonlein\b": "[FALSE_NEGATIVE]Henoch Schonlein[/FALSE_NEGATIVE]",
+        r"\bGehrig's\b": "[FALSE_NEGATIVE]Gehrig's[/FALSE_NEGATIVE]",
     }
-    count = 0
+    fn_count = 0
     for original, replacement in false_negatives.items():
         if original in text:
-            count += text.count(original)
+            fn_count += text.count(original)
             text = text.replace(original, replacement)
-    return text, count
+    return text, fn_count
+
+
+# Function to count true positives
+def count_true_positives(text: str):
+    true_positives = [
+        "[PERSON]",
+        "[ID]",
+        "[GPE]",
+        "[NHS_NUMBER]",
+        "[DATE_TIME]",
+        "[LOCATION]",
+        "[EVENT]",
+        "[POSTCODE]",
+    ]
+    tp_count = sum(text.count(tp) for tp in true_positives)
+    return tp_count
 
 
 # Function to visualize the redaction tokens
@@ -50,7 +69,6 @@ def visualize_entities(redacted_text: str):
         "ID": "linear-gradient(90deg, #ff9a9e, #fecfef)",
         "GPE": "linear-gradient(90deg, #fccb90, #d57eeb)",
         "NHS_NUMBER": "linear-gradient(90deg, #ff9a9e, #fecfef)",
-        "NUMBER": "linear-gradient(90deg, #ff9a9e, #fecfef)",
         "DATE_TIME": "linear-gradient(90deg, #fddb92, #d1fdff)",
         "LOCATION": "linear-gradient(90deg, #a1c4fd, #c2e9fb)",
         "EVENT": "linear-gradient(90deg, #a6c0fe, #f68084)",
@@ -65,7 +83,6 @@ def visualize_entities(redacted_text: str):
         "[LOCATION]": "LOCATION",
         "[ID]": "ID",
         "[NHS_NUMBER]": "NHS_NUMBER",
-        "[NUMBER]": "NUMBER",
         "[DATE_TIME]": "DATE_TIME",
         "[EVENT]": "EVENT",
         "[POSTCODE]": "POSTCODE",
@@ -86,11 +103,31 @@ def visualize_entities(redacted_text: str):
     return f'<div style="white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">{redacted_text}</div>'
 
 
+# Function to generate confusion matrix
+def generate_confusion_matrix(tp_count, fn_count):
+    # Here, we assume true negatives (TN) and false positives (FP) as zero for simplicity
+    data = {"Actual Positive": [tp_count, fn_count], "Actual Negative": [0, 0]}
+    df = pd.DataFrame(data, index=["Predicted Positive", "Predicted Negative"])
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(df, annot=True, fmt="d", cmap="Blues")
+    plt.title("Confusion Matrix")
+    plt.xlabel("Actual")
+    plt.ylabel("Predicted")
+    return plt
+
+
 def redact_and_visualize(text: str):
     redacted_text = redact(text)
     redacted_text_with_fn, fn_count = flag_false_negatives(redacted_text)
+    tp_count = count_true_positives(redacted_text_with_fn)
     visualized_html = visualize_entities(redacted_text_with_fn)
-    return visualized_html, f"Total False Negatives: {fn_count}"
+    confusion_matrix_plot = generate_confusion_matrix(tp_count, fn_count)
+    return (
+        visualized_html,
+        f"Total False Negatives: {fn_count}",
+        f"Total True Positives: {tp_count}",
+        confusion_matrix_plot,
+    )
 
 
 hint = """
@@ -130,7 +167,7 @@ sample_text = """
 
 8. Dr. Kawasaki (NHS No: 2233445566) treated young Henoch Schonlein for Henoch-Schönlein purpura, a rare disorder that causes inflammation of the blood vessels, at Great Ormond Street Hospital on 05/05/2024. Schonlein's case was not related to Kawasaki disease, a condition that primarily affects children and causes inflammation in the walls of medium-sized arteries.
 
-9. Wilson Menkes (NHS No: 943 476 5915), a 42-year-old man, was diagnosed with Wilson's disease, a rare genetic disorder that causes copper to accumulate in the body. Menkes' diagnosis was confirmed by his geneticist, Dr. Niemann Pick, at Addenbrooke's Hospital on 02/02/2025, who noted that the condition was not related to Niemann-Pick disease, another rare genetic disorder that affects lipid storage. Postcode was GH75 3HF.
+9. Wilson Menkes (NHS No: 943 476 5916), a 42-year-old man, was diagnosed with Wilson's disease, a rare genetic disorder that causes copper to accumulate in the body. Menkes' diagnosis was confirmed by his geneticist, Dr. Niemann Pick, at Addenbrooke's Hospital on 02/02/2025, who noted that the condition was not related to Niemann-Pick disease, another rare genetic disorder that affects lipid storage. Postcode was GH75 3HF.
 
 10. Dr. Marfan (NHS No: 4455667788) treated Ms. Ehlers Danlos for Ehlers-Danlos syndrome, a group of inherited disorders that affect the connective tissues, at the Royal Brompton Hospital on 30/11/2024. Danlos' case was not related to Marfan syndrome, another genetic disorder that affects connective tissue development and leads to abnormalities in the bones, eyes, and cardiovascular system.
 """
@@ -149,6 +186,8 @@ iface = gr.Interface(
     outputs=[
         gr.HTML(label="Anonymised Text with Visualization"),
         gr.Textbox(label="Total False Negatives", lines=1),
+        gr.Textbox(label="Total True Positives", lines=1),
+        gr.Plot(label="Confusion Matrix"),
     ],
     title="SETT: Data and AI. Pteredactyl Demo",
     description=description,
