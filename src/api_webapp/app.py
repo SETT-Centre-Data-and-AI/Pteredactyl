@@ -58,7 +58,7 @@ def visualize_entities(redacted_text: str):
     for token, color_class in token_colors.items():
         redacted_text = wrap_token_in_html(redacted_text, token, colors[color_class])
 
-    return f'<div style="white-space: pre-wrap;">{redacted_text}</div>'
+    return f'<div style="white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">{redacted_text}</div>'
 
 
 def redact_and_visualize(text: str):
@@ -68,7 +68,6 @@ def redact_and_visualize(text: str):
 
 
 hint = """
-
 # Guide/Instructions
 
 ## How the tool works:
@@ -86,10 +85,9 @@ The model running under the hood is presently: "StanfordAIMI/stanford-deidentifi
 - It's known significant weaknesses are that it misses postcodes as these were not in its development set.
 
 - It may overly aggressively redact text because it was built as a research tool where precision is prized > recall.
+"""
 
-### Demo Test Text
-- Redaction Challenge v1. Here is some very tricky to redact pseudo-clinical text. The tool has been validated against this:
-
+sample_text = """
 1. Dr. Huntington (NHS No: 1234567890) diagnosed Ms. Alzheimer with Alzheimer's disease during her last visit to the Huntington Medical Center on 12/12/2023. The prognosis was grim, but Dr. Huntington assured Ms. Alzheimer that the facility was well-equipped to handle her condition despite the lack of a cure for Alzheimer's.
 
 2. Paget Brewster (NHS No: 0987654321), a 45-year-old woman, was recently diagnosed with Paget's disease of bone by her physician, Dr. Graves at St. Jenny's Hospital on 01/06/2026 Postcode: JE30 6YN. Paget's disease is a chronic disorder that affects bone remodeling, leading to weakened and deformed bones. Brewster's case is not related to Grave's disease, an autoimmune disorder affecting the thyroid gland.
@@ -111,8 +109,6 @@ The model running under the hood is presently: "StanfordAIMI/stanford-deidentifi
 10. Dr. Marfan (NHS No: 4455667788) treated Ms. Ehlers Danlos for Ehlers-Danlos syndrome, a group of inherited disorders that affect the connective tissues, at the Royal Brompton Hospital on 30/11/2024. Danlos' case was not related to Marfan syndrome, another genetic disorder that affects connective tissue development and leads to abnormalities in the bones, eyes, and cardiovascular system.
 """
 
-default_text = "<Place your Text to Redact Here>"
-
 description = """
 *Release Date:* 29/06/2024
 
@@ -121,10 +117,13 @@ description = """
 *Authors:* **Cai Davis, Michael George, Matt Stammers**
 """
 
+# Initial HTML content to show the box at the start
+initial_html = "<div style='white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; border-radius: 5px;'>Enter text to see redacted output.</div>"
+
 iface = gr.Interface(
     fn=redact_and_visualize,
-    inputs=gr.Textbox(placeholder=default_text, label="Input Text", lines=25),
-    outputs=gr.HTML(label="Anonymised Text with Visualization"),
+    inputs=gr.Textbox(value=sample_text, label="Input Text", lines=25),
+    outputs=gr.HTML(value=initial_html, label="Anonymised Text with Visualization"),
     title="SETT: Data and AI. Pteredactyl Demo",
     description=description,
     article=hint,
