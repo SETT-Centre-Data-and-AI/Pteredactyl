@@ -304,7 +304,7 @@ def redact_and_visualize(text: str, model_name: str):
 
 hint = """
 <p align="center">
-  <img src="./assets/img/SETT_Logo.jpg" alt="SETT Logo" />
+  <img src="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/SETT_Logo.jpg" alt="SETT Logo" />
 </p>
 
 ## Pteredactyl Gradio Webapp and API
@@ -328,10 +328,15 @@ docker build -t pteredactyl:latest .
 docker run -d -p 7860:7860 --name pteredactyl-app pteredactyl:latest
 ```
 
-## Information
+## Logo
 
-A lot of work and experimentation has gone into the development of this tool. Because we believe in being fully transparent further details are given below.
+<p align="center">
+  <img src="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg" alt="SETT Logo" />
+</p>
 
+## Background
+
+We introduce a concentrated validation battery to the open-source OHDSI community, a Python module for cPII redaction on free text, and a web application that compares various models against the battery. This setup, which allows simultaneous production API deployment using  Gradio, is remarkably efficient and can operate on a single CPU core.
 
 ### Methods:
 
