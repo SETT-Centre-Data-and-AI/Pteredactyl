@@ -303,10 +303,6 @@ def redact_and_visualize(text: str, model_name: str):
 
 
 hint = """
-<p align="center">
-  <img src="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/SETT_Logo.jpg" alt="SETT Logo" />
-</p>
-
 ## Pteredactyl Gradio Webapp and API
 
 Clinical patient identifiable information (cPII) presents a significant challenge in natural language processing (NLP) that has yet to be fully resolved but significant progress is being made [1,2].
@@ -327,12 +323,6 @@ Please note if deploying the docker image the port bindings are to 7860. The ima
 docker build -t pteredactyl:latest .
 docker run -d -p 7860:7860 --name pteredactyl-app pteredactyl:latest
 ```
-
-## Logo
-
-<p align="center">
-  <img src="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg" alt="SETT Logo" />
-</p>
 
 ## Background
 

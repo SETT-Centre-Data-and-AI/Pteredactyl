@@ -16,9 +16,21 @@ This is why we created [Pteredactyl](https://pypi.org/project/pteredactyl/) - a 
 
 When the input text is entered, the tool redacts the cPII from the entered text using NLP with labelled masking tokens and then assesses the models results. You can test the text against different models by selecting from the dropdown.
 
-## Deployment Options
+## Python Module
 
-This webapp is available online as a gradio app on Huggingface: [Huggingface Gradio App](https://huggingface.co/spaces/MattStammers/pteredactyl_PII). It is also available as [source](https://github.com/SETT-Centre-Data-and-AI/PteRedactyl) or as a Docker Image: [Docker Image](https://registry.hub.docker.com/r/mattstammers/pteredactyl). All are MIT licensed.
+The source code for the python module can be accessed here: [Pteredactyl](https://github.com/MattStammers/Pteredactyl/tree/main/src/pteredactyl)
+
+We welcome contributors to work on this further and develop it.
+
+## Gradio Web App
+
+The source code for the web app and API can be found here: [Pteredactyl_Gradio_Web_App](https://github.com/MattStammers/Pteredactyl/tree/main/src/pteredactyl_webapp)
+
+This is so that other NHS and healthcare sites can deploy this on premesis or in the cloud as a standalone python module is not as useful as a webapp/api to most NHS/Healthcare users.
+
+This webapp is already available online as a gradio app on Huggingface: [Huggingface Gradio App](https://huggingface.co/spaces/MattStammers/pteredactyl_PII). It is also available as [source](https://github.com/SETT-Centre-Data-and-AI/PteRedactyl) or as a Docker Image: [Docker Image](https://registry.hub.docker.com/r/mattstammers/pteredactyl). All are MIT licensed.
+
+## Docker Deployment
 
 Please note if deploying the docker image the port bindings are to 7860. The image can also be deployed from source using the following command:
 
@@ -26,11 +38,8 @@ Please note if deploying the docker image the port bindings are to 7860. The ima
 docker build -t pteredactyl:latest .
 docker run -d -p 7860:7860 --name pteredactyl-app pteredactyl:latest
 ```
-## Logo
 
-<p align="center">
-  <img src="./src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg" alt="SETT Logo" />
-</p>
+Or can be deployed directly from [Docker Hub](https://registry.hub.docker.com/r/mattstammers/pteredactyl)
 
 ## Background
 
@@ -71,6 +80,12 @@ The full results of the tool are given below in <i>Table 1</i> below.
 The validation cohort introduced in this study proves to be a highly effective tool for discriminating the performance of open-source cPII redaction models. Intentionally exploiting common weaknesses in cNLP token masking systems offers a more rigorous cPII benchmark than many larger datasets provide.
 
 We invite the open-source community to collaborate to improve the present results and enhance the robustness of cPII redaction methods by building on the work we have begun [here](https://github.com/SETT-Centre-Data-and-AI/PteRedactyl).
+
+## Logo
+
+<p align="center">
+  <img src="./src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg" alt="SETT Logo" />
+</p>
 
 
 ### References:
