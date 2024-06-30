@@ -4,10 +4,12 @@ WORKDIR /app
 
 COPY . .
 
-RUN pip install -e ../pteredactyl
+RUN pip install poetry
 
-RUN pip install -r requirements.txt
+RUN poetry lock
+
+RUN poetry install
 
 EXPOSE 7800
 
-CMD ["python","app.py"]
+CMD ["poetry", "run", "python", "app.py"]

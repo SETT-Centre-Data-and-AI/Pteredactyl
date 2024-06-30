@@ -307,23 +307,23 @@ hint = """
 
 ## How the tool works:
 
-When the input text is entered, the tool redacts the entered text with labelled masking tokens.
-
-You can test the text against different models by selecting from the dropdown.
+When the input text is entered, the tool redacts the entered text with labelled masking tokens and then assesses the models results. You can test the text against different models by selecting from the dropdown.
 
 ### Strengths
-- The tool is 99% accurate on our test set of radiology reports.
+- The Stanford De-Identifier Base Model is 99% accurate on our test set of radiology reports. The others are really to illustrate its superiority.
+
+- This test set here was derived after lots of experimentation to make the challenge as hard as possible. It is the toughest PII benchmark we have seen so far.
 
 ### Limitations
-- The tool was not designed initially to redact clinic letters as it was developed primarily on radiology reports.
+- The tool was not designed initially to redact clinic letters as it was developed primarily on radiology reports in the US. We have made some augmentations to cover postcodes but these might not always work.
 
-- It may overly aggressively redact text because it was built as a research tool where precision is prized > recall.
+- It may overly aggressively redact text because it was built as a research tool where precision is prized > recall but the recall is also high.
 """
 
 description = """
 *Release Date:* 29/06/2024
 
-*Version:* **1.0** - Working Proof of Concept Demo with API option
+*Version:* **1.0** - Working Proof of Concept Demo with API option and webapp demonstration.
 
 *Authors:* **Cai Davis, Michael George, Matt Stammers**
 """
@@ -359,4 +359,4 @@ iface = gr.Interface(
     article=hint,
 )
 
-iface.launch(server_name="0.0.0.0", server_port=7801)
+iface.launch(server_name="0.0.0.0", server_port=7800)
