@@ -66,32 +66,25 @@ reference_text = """
 
 10. [PERSON] (Patient No: [ID]) treated [PERSON] for Ehlers-Danlos syndrome, a group of inherited disorders that affect the connective tissues, at the [LOCATION] on [DATE_TIME]. [PERSON]'s case was not related to Marfan syndrome, another genetic disorder that affects connective tissue development and leads to abnormalities in the bones, eyes, and cardiovascular system. Dr [PERSON]'s username is: [USERNAME]
 """
-# Function to redact text using a specified model
 
 
 def redact(text: str, model_name: str):
-    model_path = None
+    model_paths = {
+        "Stanford Base De-Identifier": "StanfordAIMI/stanford-deidentifier-base",
+        # "Stanford with Radiology and i2b2": "StanfordAIMI/stanford-deidentifier-with-radiology-reports-and-i2b2",
+        "Deberta PII": "lakshyakh93/deberta_finetuned_pii",
+        # "Gliner PII": "urchade/gliner_multi_pii-v1",
+        # "Spacy PII": "beki/en_spacy_pii_distilbert",
+        "Nikhilrk De-Identify": "nikhilrk/de-identify",
+    }
 
-    if model_name == "Stanford Base De-Identifier":
-        model_path = "StanfordAIMI/stanford-deidentifier-base"
-    elif model_name == "Stanford with Radiology and i2b2":
-        model_path = (
-            "StanfordAIMI/stanford-deidentifier-with-radiology-reports-and-i2b2"
-        )
-    elif model_name == "Deberta PII":
-        model_path = "lakshyakh93/deberta_finetuned_pii"
-    # elif model_name == "Gliner PII":
-    #     model_path = "urchade/gliner_multi_pii-v1"
-    # elif model_name == "Spacy PII":
-    #     model_path = "beki/en_spacy_pii_distilbert"
-    elif model_name == "Nikhilrk De-Identify":
-        model_path = "nikhilrk/de-identify"
-    else:
-        model_path = "StanfordAIMI/stanford-deidentifier-base"  # Default to Stanford if model is not recognized
+    model_path = model_paths.get(model_name, "StanfordAIMI/stanford-deidentifier-base")
+
+    # Log the model being changed to
+    log.info(f"Changing to model: {model_path}")
 
     if model_path:
         change_model(model_path)
-        print(f"Changing to model: {model_path}")
     else:
         raise ValueError("No valid model path provided.")
 
@@ -100,7 +93,6 @@ def redact(text: str, model_name: str):
     return anonymized_text
 
 
-# Rest of the functions remain the same...
 def extract_tokens(text):
     tokens = re.findall(r"\[(.*?)\]", text)
     return tokens
@@ -121,10 +113,8 @@ def compare_tokens(reference_tokens, redacted_tokens):
     for token in reference_count:
         if token in redacted_count:
             tp += min(reference_count[token], redacted_count[token])
-            if reference_count[token] > redacted_count[token]:
-                fn += reference_count[token] - redacted_count[token]
-            elif redacted_count[token] > reference_count[token]:
-                fp += redacted_count[token] - reference_count[token]
+            fn += max(reference_count[token] - redacted_count[token], 0)
+            fp += max(redacted_count[token] - reference_count[token], 0)
         else:
             fn += reference_count[token]
 
@@ -159,7 +149,6 @@ def flag_errors(reference_text: str, redacted_text: str):
     fn_count = 0
     fp_count = 0
 
-    # Extract tokens with their indices from the reference text
     reference_tokens = [
         (match.group(1), match.start())
         for match in re.finditer(r"\[(.*?)\]", reference_text)
@@ -175,23 +164,19 @@ def flag_errors(reference_text: str, redacted_text: str):
     flagged_reference_text = reference_text
     flagged_redacted_text = redacted_text
 
-    # Flag false negatives (missed redactions)
     for token, _ in reference_tokens:
         if token not in redacted_set:
             fn_count += 1
-            print(f"False Negative Detected: {token}")
             flagged_reference_text = flagged_reference_text.replace(
                 f"[{token}]", f"[FALSE_NEGATIVE]{token}[/FALSE_NEGATIVE]"
             )
 
-    # Flag false positives (incorrect redactions)
     for token, _ in redacted_tokens:
         if token not in reference_set and token not in [
             "FALSE_NEGATIVE",
             "/FALSE_NEGATIVE",
         ]:
             fp_count += 1
-            print(f"False Positive Detected: {token}")
             flagged_redacted_text = flagged_redacted_text.replace(
                 f"[{token}]", f"[FALSE_POSITIVE]{token}[/FALSE_POSITIVE]"
             )
@@ -199,7 +184,6 @@ def flag_errors(reference_text: str, redacted_text: str):
     return flagged_reference_text, flagged_redacted_text, fn_count, fp_count
 
 
-# Function to visualize the redaction tokens
 def visualize_entities(redacted_text: str):
     colors = {
         "PERSON": "linear-gradient(90deg, #aa9cfc, #fc9ce7)",
@@ -217,7 +201,6 @@ def visualize_entities(redacted_text: str):
         "/FALSE_POSITIVE": "linear-gradient(90deg, #ffcccb, #ff6666)",  # Light red for false positives
     }
 
-    # Map of tokens to color classes
     token_colors = {
         "[PERSON]": "PERSON",
         "[LOCATION]": "LOCATION",
@@ -233,20 +216,17 @@ def visualize_entities(redacted_text: str):
         "[/FALSE_POSITIVE]": "/FALSE_POSITIVE",
     }
 
-    # Function to wrap tokens with span elements without replacing the token
     def wrap_token_in_html(text, token, color):
         parts = text.split(token)
         wrapped_token = f'<span style="background: {color}; padding: 2px; border-radius: 3px;">{token}</span>'
         return wrapped_token.join(parts)
 
-    # Wrap each token with highlighted spans
     for token, color_class in token_colors.items():
         redacted_text = wrap_token_in_html(redacted_text, token, colors[color_class])
 
     return f'<div style="white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">{redacted_text}</div>'
 
 
-# Function to generate confusion matrix
 def generate_confusion_matrix(tp_count, fn_count, fp_count, tn_count):
     data = {
         "Actual Positive": [tp_count, fn_count],
@@ -261,7 +241,6 @@ def generate_confusion_matrix(tp_count, fn_count, fp_count, tn_count):
     return plt
 
 
-# Function to calculate evaluation metrics
 def calculate_metrics(tp_count, fn_count, fp_count, tn_count):
     accuracy = (tp_count + tn_count) / (tp_count + fn_count + fp_count + tn_count)
     precision = tp_count / (tp_count + fp_count) if (tp_count + fp_count) > 0 else 0
@@ -293,10 +272,10 @@ def redact_and_visualize(text: str, model_name: str):
     )
 
     # Print the final texts with flags for debugging
-    print("Final Reference Text with False Negatives:")
-    print(reference_text_with_fn)
-    print("\nFinal Redacted Text with False Positives:")
-    print(redacted_text_with_fp)
+    log.debug("Final Reference Text with False Negatives:")
+    log.debug(reference_text_with_fn)
+    log.debug("\nFinal Redacted Text with False Positives:")
+    log.debug(redacted_text_with_fp)
 
     # Count entities and compute metrics
     tp_count, fn_count, fp_count, tn_count = count_entities_and_compute_metrics(
@@ -356,7 +335,7 @@ iface = gr.Interface(
         gr.Dropdown(
             choices=[
                 "Stanford Base De-Identifier",
-                "Stanford with Radiology and i2b2",
+                # "Stanford with Radiology and i2b2",
                 "Deberta PII",
                 # "Gliner PII",
                 # "Spacy PII",

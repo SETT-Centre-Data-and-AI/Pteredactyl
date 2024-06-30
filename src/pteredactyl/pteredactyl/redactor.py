@@ -77,32 +77,6 @@ def create_analyser(
     return analyser
 
 
-def chunk_text(text: str, max_length: int = 512, overlap: int = 50) -> list[str]:
-    """
-    Splits the input text into chunks of a specified maximum length with overlap.
-
-    Args:
-        text (str): The input text to be chunked.
-        max_length (int): The maximum length of each chunk. Defaults to 512.
-        overlap (int): The number of overlapping tokens between consecutive chunks. Defaults to 50.
-
-    Returns:
-        list[str]: A list of text chunks.
-    """
-    words = text.split()
-    chunks = []
-    start = 0
-
-    while start < len(words):
-        end = min(start + max_length, len(words))
-        chunks.append(" ".join(words[start:end]))
-        if end == len(words):
-            break
-        start = end - overlap
-
-    return chunks
-
-
 def analyse(
     text: str,
     analyser: AnalyzerEngine | None = None,
@@ -176,28 +150,21 @@ def analyse(
                 analyser=analyser, regex_entities=regex_entities
             )
 
-    # Chunk the text if it exceeds the maximum length
-    text_chunks = chunk_text(text)
-
     # Analyse
-    results = []
-    for chunk in text_chunks:
-        initial_results = analyser.analyze(
-            chunk, language=language, entities=entities, **kwargs
+    initial_results = analyser.analyze(
+        text, language=language, entities=entities, **kwargs
+    )
+
+    if mask_individual_words:
+        initial_results = split_results_into_individual_words(
+            text=text, results=initial_results, text_separator=text_separator
         )
 
-        if mask_individual_words:
-            initial_results = split_results_into_individual_words(
-                text=chunk, results=initial_results, text_separator=text_separator
-            )
-
-        chunk_results = return_allowed_results(
-            initial_results=initial_results,
-            allowed_entities=allowed_entities,
-            allowed_regex_entities=allowed_regex_entities,
-        )
-
-        results.extend(chunk_results)
+    results = return_allowed_results(
+        initial_results=initial_results,
+        allowed_entities=allowed_entities,
+        allowed_regex_entities=allowed_regex_entities,
+    )
 
     results.sort(key=lambda x: x.start)
 
@@ -300,23 +267,17 @@ def anonymise(
                 analyser=analyser, regex_entities=regex_entities
             )
 
-    # Chunk the text if it exceeds the maximum length
-    text_chunks = chunk_text(text)
-
     # Analyse the text
-    all_results = []
-    for chunk in text_chunks:
-        initial_results = analyse(
-            chunk,
-            analyser,
-            entities=entities,
-            regex_entities=regex_entities,
-            mask_individual_words=mask_individual_words,
-            text_separator=text_separator,
-            rebuild_regex_recognisers=False,
-            **kwargs,
-        )
-        all_results.extend(initial_results)
+    initial_results = analyse(
+        text,
+        analyser,
+        entities=entities,
+        regex_entities=regex_entities,
+        mask_individual_words=mask_individual_words,
+        text_separator=text_separator,
+        rebuild_regex_recognisers=False,
+        **kwargs,
+    )
 
     # Create an OperatorConfig that randomly selects replacements from the replacement list
     operator_config = None
@@ -336,13 +297,13 @@ def anonymise(
     # if-else is strictly required as the anonymize method modifies initial_results variable when called
     if not mask_individual_words:
         anonymized_result = anonymiser.anonymize(
-            text=text, analyzer_results=all_results, operators=operator_config
+            text=text, analyzer_results=initial_results, operators=operator_config
         )
     else:
         # this is essentially AnonymizerEngine.anonymize without merging adjacent entities of the same type
         # some discussion around merging adjacent entities: https://github.com/microsoft/presidio/issues/1090
         analyzer_results = anonymiser._remove_conflicts_and_get_text_manipulation_data(
-            all_results, ConflictResolutionStrategy.MERGE_SIMILAR_OR_CONTAINED
+            initial_results, ConflictResolutionStrategy.MERGE_SIMILAR_OR_CONTAINED
         )
         operators = anonymiser._AnonymizerEngine__check_or_add_default_operator(
             operator_config

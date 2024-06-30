@@ -3,7 +3,7 @@
 from pteredactyl.regex_entities import REGEX_ENTITIES
 
 DEFAULT_SPACY_MODEL = "en_core_web_sm"
-DEFAULT_NER_MODEL = ""  # Set to an empty string
+DEFAULT_NER_MODEL = "StanfordAIMI/stanford-deidentifier-base"
 
 DEFAULT_ENTITIES = [
     "LOCATION",
