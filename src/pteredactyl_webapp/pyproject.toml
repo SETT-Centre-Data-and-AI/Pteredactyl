@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pteredactyl_api"
-version = "1.0.0"
+version = "1.0.1"
 description = "Pteredactyl performs free-text redaction and masking of peronally identifiable information (PII) in clinical free text. This uses gradio to deploy it locally either as a webapp or API"
 authors = [
     "Cai Davis", "Michael George", "Matt Stammers"
