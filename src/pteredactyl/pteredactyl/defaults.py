@@ -1,3 +1,5 @@
+# defaults.py
+
 from pteredactyl.regex_entities import REGEX_ENTITIES
 
 DEFAULT_SPACY_MODEL = "en_core_web_sm"
@@ -57,3 +59,21 @@ def show_defaults() -> None:
     print(f"DEFAULT_SPACY_MODEL:    {DEFAULT_SPACY_MODEL}")
     print(f"DEFAULT_ENTITIES:       {DEFAULT_ENTITIES}")
     print(f"DEFAULT_REGEX_ENTITIES: {DEFAULT_REGEX_ENTITIES}")
+
+
+def change_model(new_model: str) -> None:
+    """
+    Change the default NER model.
+
+    Parameters
+    ----------
+    new_model : str
+        The new model path to be set as the default NER model.
+
+    Returns
+    -------
+    None
+    """
+    global DEFAULT_NER_MODEL
+    DEFAULT_NER_MODEL = new_model
+    print(f"DEFAULT_NER_MODEL changed to: {DEFAULT_NER_MODEL}")

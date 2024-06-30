@@ -132,9 +132,19 @@ def load_spacy_model(spacy_model: str) -> None:
 
 
 def load_transformers_recognizer(model_path: str) -> TransformersRecogniser:
+    """Loads transformers recognizer with the specified model path
+
+    Args:
+        model_path (str): Path to the transformer model
+
+    Returns:
+        TransformersRecogniser: Loaded transformers recognizer
+    """
+    print(f"Loading transformers recognizer with model path: {model_path}")
     config = _get_config(model_path=model_path)
     transformers_recognizer = TransformersRecogniser(model_path=model_path)
     transformers_recognizer.load_transformer(**config)
+    print(f"Model {model_path} loaded successfully")
     return transformers_recognizer
 
 
@@ -202,7 +212,6 @@ def load_nlp_engine(
     Returns:
         NlpEngineProvider: The loaded engine.
     """
-
     log_level = presidio_logger.level
     presidio_logger.setLevel("ERROR")
     nlp_engine = NlpEngineProvider(nlp_configuration=nlp_configuration).create_engine()

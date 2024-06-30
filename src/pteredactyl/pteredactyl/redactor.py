@@ -16,6 +16,7 @@ from pteredactyl.defaults import (
     DEFAULT_NER_MODEL,
     DEFAULT_REGEX_ENTITIES,
     DEFAULT_SPACY_MODEL,
+    change_model,
 )
 from pteredactyl.recognisers.pteredactyl_recogniser import PteredactylRecogniser
 from pteredactyl.regex_entities import (
@@ -37,37 +38,18 @@ presidio_logger = logging.getLogger("presidio-analyzer")
 
 
 def create_analyser(
-    model_path: str = DEFAULT_NER_MODEL,
+    model_path: str = None,
     spacy_model: str = DEFAULT_SPACY_MODEL,
     language: str = "en",
     regex_entities: Sequence[str | PteredactylRecogniser] = DEFAULT_REGEX_ENTITIES,
 ) -> AnalyzerEngine:
     """
     Create an analyser engine with a Transformers NER model and spaCy model.
-    It is recommended to use this function to create an analyser and pass it
-    to analyse/anonymise functions downstream to be reused, rather than allowing
-    downstream functions to spin up new analyser engines automatically.
-
-    Args:
-        model_path (str): The path to the model used for analysis.
-            Defaults to DEFAULT_NER_MODEL (stanford-deidentifier-base).
-        spacy_model (str): The spaCy model to use.
-            Defaults to DEFAULT_SPACY_MODEL (en_core_web_sm).
-        language (str): The language of the text to be analyzed.
-            Defaults to "en".
-        regex_entities (list, optional): A list of regex entity types to analyze.
-            If not provided, a default list will be used.
-
-    Examples:
-        Create an analyser engine with the default models:
-        > analyser = create_analyser()
-
-        Create an analyser engine with custom models:
-        > `analyser = create_analyser(model_path='StanfordAIMI/stanford-deidentifier-base', spacy_model="en_core_web_lg")`
-
-    Returns:
-        AnalyzerEngine: The analyser engine, which can be passed to analyse(), anonymise(), or anonymise_df().
     """
+    if not model_path:
+        raise ValueError("No model path provided for NER model.")
+
+    print(f"Using model path: {model_path}")
 
     if regex_entities:
         regex_entities = build_regex_entity_recogniser_list(
@@ -100,8 +82,7 @@ def analyse(
     analyser: AnalyzerEngine | None = None,
     entities: str | list[str] = DEFAULT_ENTITIES,
     regex_entities: Sequence[str | PteredactylRecogniser] = DEFAULT_REGEX_ENTITIES,
-    # TODO: Cai - optional, consider merging regex_entities and entities into a single argument
-    model_path: str = DEFAULT_NER_MODEL,
+    model_path: str = None,
     spacy_model: str = DEFAULT_SPACY_MODEL,
     language: str = "en",
     mask_individual_words: bool = False,
@@ -197,7 +178,7 @@ def anonymise(
     regex_entities: Sequence[str | PteredactylRecogniser] = DEFAULT_REGEX_ENTITIES,
     highlight: bool = False,
     replacement_lists: dict | None = None,
-    model_path: str = DEFAULT_NER_MODEL,
+    model_path: str = None,
     spacy_model: str = DEFAULT_SPACY_MODEL,
     language: str = "en",
     mask_individual_words: bool = False,
@@ -216,8 +197,8 @@ def anonymise(
     regex_entities (list, optional): A list of regex entities or PteredactylRecognisers to analyse. If not provided, a default list will be used.
     highlight (bool): If True, highlights the anonymized parts in the text.
     replacement_lists: (dict, optional): A dictionary with entity types as keys and lists of replacement values for hide-in-plain-sight redaction.
-    model_path (str): The path to the model used for analysis (e.g. 'StanfordAIMI/stanford-deidentifier-base'). Used only if analyser not provided.
-    spacy_model (str): The spaCy model to use (e.g. 'en_core_web_sm'). Used only if analyser not provided.
+    model_path (str): The path to the model used for analysis. Used only if analyser not provided.
+    spacy_model (str): The spaCy model to use. Used only if analyser not provided.
     language (str): The language of the text to be analyzed. Defaults to "en". Used only if analyser not provided.
     mask_individual_words (bool): If True, prevents joining of next-door entities together.
             (i.e. Jane Smith becomes <PERSON> <PERSON> if True, or <PERSON> if False). Defaults to False.
@@ -346,7 +327,7 @@ def anonymise_df(
     highlight: bool = False,
     replacement_lists: dict | None = None,
     inplace: bool = False,
-    model_path: str = DEFAULT_NER_MODEL,
+    model_path: str = None,
     spacy_model: str = DEFAULT_SPACY_MODEL,
     language: str = "en",
     mask_individual_words: bool = False,
@@ -368,8 +349,8 @@ def anonymise_df(
     regex_entities (list, optional): A list of regex entities or PteredactylRecognisers to analyse. If not provided, a default list will be used.
     highlight (bool): If True, highlights the anonymized parts in the text.
     replacement_lists: (dict, optional): A dictionary with entity types as keys and lists of replacement values for hide-in-plain-sight redaction.
-    model_path (str): The path to the model used for analysis (e.g. 'StanfordAIMI/stanford-deidentifier-base'). Used only if analyser not provided.
-    spacy_model (str): The spaCy model to use (e.g. 'en_core_web_sm'). Used only if analyser not provided.
+    model_path (str): The path to the model used for analysis. Used only if analyser not provided.
+    spacy_model (str): The spaCy model to use. Used only if analyser not provided.
     language (str): The language of the text to be analyzed. Defaults to "en". Used only if analyser not provided.
     mask_individual_words (bool): If True, prevents joining of next-door entities together.
             (i.e. Jane Smith becomes <PERSON> <PERSON> if True, or <PERSON> if False). Defaults to False.

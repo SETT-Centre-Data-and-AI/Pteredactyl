@@ -27,6 +27,7 @@ ipywidgets = "*"
 pandas = "*"
 gradio = "*"
 pyyaml = "*"
+seaborn = "*"
 
 [tool.poetry.group.dev.dependencies]
 commitizen = "*"
