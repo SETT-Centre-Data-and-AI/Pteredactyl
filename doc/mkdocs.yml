@@ -1,0 +1,91 @@
+# Project information
+site_name: "Pteredactyl Documentation"
+site_description: "Documentation Site for the Pteredactyl Python Module, Gradio Webapp, API."
+site_author: "Matt Stammers, Cai Davis, Michael George"
+site_url: "https://github.com/MattStammers/Pteredactyl"
+
+# Copyright
+copyright: "2024 Pteredactyl"
+
+# Repository
+repo_name: "Pteredactyl GitHub"
+repo_url: "https://github.com/MattStammers/Pteredactyl"
+edit_uri: "https://github.com/MattStammers/Pteredactyl/edit/main/docs"
+
+# Configuration
+docs_dir: "docs"
+theme:
+  name: "material"
+  language: "en"
+  shortcuts:
+    help: 191 # ?
+    next: 78 # n
+    previous: 80 # p
+    search: 83 # s
+  palette:
+    primary: "blue"
+    accent: "blue"
+  features:
+    - tabs
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - mdx_math:
+      enable_dollar_delimiter: true
+  - toc:
+      permalink: true
+      separator: "_"
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [../src]
+  - search:
+      separator: '[\s\-\.]+'
+      lang:
+        - en
+
+# Customization
+extra_javascript:
+  - "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-MML-AM_CHTML"
+extra_css:
+  - "assets/css/custom.css"
+extra:
+  manifest: "manifest.json"
+  social:
+    - icon: "fontawesome/brands/github-alt"
+      link: "https://github.com/MattStammers"
+    - icon: "fontawesome/brands/twitter"
+      link: "https://twitter.com/MattStammers_"
+
+# Page tree
+nav:
+  - Home: index.md
+  - Introduction: introduction.md
+  - Tool Usage Instructions: usage-instructions.md
+  - Python Module: python-module.md
+  - Gradio Web App: gradio-webapp.md
+  - Docker Deployment: docker-deployment.md
+  - Background: background.md
+  - Methods: methods.md
+  - Results: results.md
+  - Strengths: strengths.md
+  - Limitations: limitations.md
+  - Conclusion: conclusion.md
+  - References: references.md
+  - Getting Started:
+      - Python Setup: getting-started/python-setup.md
+      - Installing Clients: getting-started/installing-clients.md
+      - Setting Up Credentials: getting-started/setting-up-credentials.md
+      - First Connection: getting-started/connecting.md
+      - Further Developing the Docs: getting-started/docs-development.md
+  - Extensions:
+      - MathJax: extensions/mathjax.md
+      - Code Hilite: extensions/code-hilite.md
+      - Footnote: extensions/footnote.md
+  - Material for MkDocs: material-for-mkdocs.md
+  - License: license.md

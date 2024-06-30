@@ -9,7 +9,6 @@ __pycache__/
 # Distribution / packaging
 flagged/
 docs/
-mkdocs.yml
 .Python
 build/
 develop-eggs/

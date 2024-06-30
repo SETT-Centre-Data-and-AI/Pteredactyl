@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "documentation for pyterdactyl"
+version = "1.0.0"
+description = "Your project description"
+authors = ["Matt Stammers"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+mkdocs = "*"
+mkdocs-material = "*"
+mkdocstrings = "*"
+mkdocstrings-python = "*"
+python-markdown-math = "*"
+Pygments = "*"
+prompt_toolkit = "*"
+pyyaml = "*"
+Jinja2 = "*"
+
+[tool.poetry.dev-dependencies]
+invoke = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+version = "mkdocs --version"
+help = "mkdocs --help"
+serve = "invoke serve"
+build = "mkdocs build"
+deploy = "mkdocs gh-deploy"
