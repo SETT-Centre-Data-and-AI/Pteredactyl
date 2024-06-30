@@ -14,6 +14,7 @@ pteredactyl = "*"
 gradio = "*"
 pyyaml = "*"
 seaborn = "*"
+install = "^1.3.5"
 
 [tool.poetry.group.dev.dependencies]
 commitizen = "*"
