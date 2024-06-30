@@ -41,6 +41,7 @@ The full results of the tool are given below in <i>Table 1</i> below.
 | Precision  | 0.91                        | 0.93        | 0.28                 |
 | Recall     | 0.94                        | 0.16        | 0.49                 |
 | F1 Score   | 0.93                        | 0.28        | 0.36                 |
+
 <small><i>Table 1: Summary of Model Performance Metrics</i></small>
 
 ### Strengths
@@ -60,7 +61,8 @@ The full results of the tool are given below in <i>Table 1</i> below.
 ### Conclusion
 The validation cohort introduced in this study proves to be a highly effective tool for discriminating the performance of open-source cPII redaction models. Intentionally exploiting common weaknesses in cNLP token masking systems offers a more rigorous cPII benchmark than many larger datasets provide.
 
-We invite the open-source community to collaborate to improve the present results and enhance the robustness of cPII redaction methods by building on the work we have begun here [here](https://github.com/SETT-Centre-Data-and-AI/PteRedactyl).
+We invite the open-source community to collaborate to improve the present results and enhance the robustness of cPII redaction methods by building on the work we have begun [here](https://github.com/SETT-Centre-Data-and-AI/PteRedactyl).
+
 
 ### References:
 1. Chambon PJ, Wu C, Steinkamp JM, Adleberg J, Cook TS, Langlotz CP. Automated deidentification of radiology reports combining transformer and “hide in plain sight” rule-based methods. J Am Med Inform Assoc. 2023 Feb 1;30(2):318–28.

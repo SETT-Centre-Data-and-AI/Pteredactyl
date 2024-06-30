@@ -1,5 +1,3 @@
-# defaults.py
-
 from pteredactyl.regex_entities import REGEX_ENTITIES
 
 DEFAULT_SPACY_MODEL = "en_core_web_sm"
