@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./src/pteredactyl_webapp/assets/img/SETT_Logo.jpg" alt="SETT Logo" />
+  <img src="https://github.com/MattStammers/Pteredactyl/edit/main/src/pteredactyl_webapp/assets/img/SETT_Logo.jpg" alt="SETT Logo" />
 </p>
 
 # Pteredactyl Python Module, Gradio Webapp, API
