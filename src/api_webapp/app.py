@@ -70,20 +70,32 @@ reference_text = """
 
 
 def redact(text: str, model_name: str):
-    if model_name == "Stanford":
-        change_model("StanfordAIMI/stanford-deidentifier-base")
-    elif model_name == "Stanford with Radiology":
-        change_model(
+    model_path = None
+
+    if model_name == "Stanford Base De-Identifier":
+        model_path = "StanfordAIMI/stanford-deidentifier-base"
+    elif model_name == "Stanford with Radiology and i2b2":
+        model_path = (
             "StanfordAIMI/stanford-deidentifier-with-radiology-reports-and-i2b2"
         )
     elif model_name == "Deberta PII":
-        change_model("lakshyakh93/deberta_finetuned_pii")
+        model_path = "lakshyakh93/deberta_finetuned_pii"
+    # elif model_name == "Gliner PII":
+    #     model_path = "urchade/gliner_multi_pii-v1"
+    # elif model_name == "Spacy PII":
+    #     model_path = "beki/en_spacy_pii_distilbert"
+    elif model_name == "Nikhilrk De-Identify":
+        model_path = "nikhilrk/de-identify"
     else:
-        change_model(
-            "StanfordAIMI/stanford-deidentifier-base"
-        )  # Default to Stanford if model is not recognized
-    print("Changing_model...")
-    anonymized_text = pt.anonymise(text)  # This should use the updated model
+        model_path = "StanfordAIMI/stanford-deidentifier-base"  # Default to Stanford if model is not recognized
+
+    if model_path:
+        change_model(model_path)
+        print(f"Changing to model: {model_path}")
+    else:
+        raise ValueError("No valid model path provided.")
+
+    anonymized_text = pt.anonymise(text, model_path=model_path)  # Pass model_path
     anonymized_text = anonymized_text.replace("<", "[").replace(">", "]")
     return anonymized_text
 
@@ -260,10 +272,10 @@ def calculate_metrics(tp_count, fn_count, fp_count, tn_count):
     metrics_table = f"""
     <table>
         <tr><th>Metric</th><th>Value</th></tr>
-        <tr><td>Accuracy = (TP+TN) / (TP + FN + FP + TN) </td><td>{accuracy:.2f}</td></tr>
-        <tr><td>Precision = TP / (TP + FP) </td><td>{precision:.2f}</td></tr>
-        <tr><td>Recall = TP / (TP + FN) </td><td>{recall:.2f}</td></tr>
-        <tr><td>F1 Score = 2 * Precision * Recall / (Precision + Recall) </td><td>{f1_score:.2f}</td></tr>
+        <tr><td>Accuracy: [(TP+TN) / (TP + FN + FP + TN)] </td><td>{accuracy:.2f}</td></tr>
+        <tr><td>Precision: [TP / (TP + FP)] </td><td>{precision:.2f}</td></tr>
+        <tr><td>Recall: [TP / (TP + FN)] </td><td>{recall:.2f}</td></tr>
+        <tr><td>F1 Score: [2 * Precision * Recall / (Precision + Recall)] </td><td>{f1_score:.2f}</td></tr>
     </table>
     """
     return metrics_table
@@ -342,9 +354,16 @@ iface = gr.Interface(
     inputs=[
         gr.Textbox(value=sample_text, label="Input Text", lines=25),
         gr.Dropdown(
-            choices=["Stanford", "Stanford with Radiology", "Deberta PII", "Other"],
+            choices=[
+                "Stanford Base De-Identifier",
+                "Stanford with Radiology and i2b2",
+                "Deberta PII",
+                # "Gliner PII",
+                # "Spacy PII",
+                "Nikhilrk De-Identify",
+            ],
             label="Model",
-            value="Stanford",
+            value="Stanford Base De-Identifier",  # Make sure this matches one of the choices
         ),
     ],
     outputs=[
@@ -360,6 +379,5 @@ iface = gr.Interface(
     description=description,
     article=hint,
 )
-
 
 iface.launch(server_name="0.0.0.0", server_port=7801)

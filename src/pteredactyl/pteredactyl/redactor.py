@@ -1,3 +1,4 @@
+import copy
 import logging
 import random
 from collections.abc import Sequence
@@ -15,6 +16,7 @@ from pteredactyl.defaults import (
     DEFAULT_NER_MODEL,
     DEFAULT_REGEX_ENTITIES,
     DEFAULT_SPACY_MODEL,
+    change_model,
 )
 from pteredactyl.recognisers.pteredactyl_recogniser import PteredactylRecogniser
 from pteredactyl.regex_entities import (
@@ -44,7 +46,10 @@ def create_analyser(
     """
     Create an analyser engine with a Transformers NER model and spaCy model.
     """
-    model_path = model_path or DEFAULT_NER_MODEL
+    if not model_path:
+        raise ValueError("No model path provided for NER model.")
+
+    print(f"Using model path: {model_path}")
 
     if regex_entities:
         regex_entities = build_regex_entity_recogniser_list(
@@ -72,23 +77,30 @@ def create_analyser(
     return analyser
 
 
-def redact(text: str, model_name: str):
-    if model_name == "Stanford":
-        change_model("StanfordAIMI/stanford-deidentifier-base")
-    elif model_name == "Stanford with Radiology":
-        change_model(
-            "StanfordAIMI/stanford-deidentifier-with-radiology-reports-and-i2b2"
-        )
-    elif model_name == "Deberta PII":
-        change_model("lakshyakh93/deberta_finetuned_pii")
-    else:
-        change_model(
-            "StanfordAIMI/stanford-deidentifier-base"
-        )  # Default to Stanford if model is not recognized
+def chunk_text(text: str, max_length: int = 512, overlap: int = 50) -> list[str]:
+    """
+    Splits the input text into chunks of a specified maximum length with overlap.
 
-    anonymized_text = pt.anonymise(text)  # This should use the updated model
-    anonymized_text = anonymized_text.replace("<", "[").replace(">", "]")
-    return anonymized_text
+    Args:
+        text (str): The input text to be chunked.
+        max_length (int): The maximum length of each chunk. Defaults to 512.
+        overlap (int): The number of overlapping tokens between consecutive chunks. Defaults to 50.
+
+    Returns:
+        list[str]: A list of text chunks.
+    """
+    words = text.split()
+    chunks = []
+    start = 0
+
+    while start < len(words):
+        end = min(start + max_length, len(words))
+        chunks.append(" ".join(words[start:end]))
+        if end == len(words):
+            break
+        start = end - overlap
+
+    return chunks
 
 
 def analyse(
@@ -96,8 +108,7 @@ def analyse(
     analyser: AnalyzerEngine | None = None,
     entities: str | list[str] = DEFAULT_ENTITIES,
     regex_entities: Sequence[str | PteredactylRecogniser] = DEFAULT_REGEX_ENTITIES,
-    # TODO: Cai - optional, consider merging regex_entities and entities into a single argument
-    model_path: str = DEFAULT_NER_MODEL,
+    model_path: str = None,
     spacy_model: str = DEFAULT_SPACY_MODEL,
     language: str = "en",
     mask_individual_words: bool = False,
@@ -165,21 +176,28 @@ def analyse(
                 analyser=analyser, regex_entities=regex_entities
             )
 
-    # Analyse
-    initial_results = analyser.analyze(
-        text, language=language, entities=entities, **kwargs
-    )
+    # Chunk the text if it exceeds the maximum length
+    text_chunks = chunk_text(text)
 
-    if mask_individual_words:
-        initial_results = split_results_into_individual_words(
-            text=text, results=initial_results, text_separator=text_separator
+    # Analyse
+    results = []
+    for chunk in text_chunks:
+        initial_results = analyser.analyze(
+            chunk, language=language, entities=entities, **kwargs
         )
 
-    results = return_allowed_results(
-        initial_results=initial_results,
-        allowed_entities=allowed_entities,
-        allowed_regex_entities=allowed_regex_entities,
-    )
+        if mask_individual_words:
+            initial_results = split_results_into_individual_words(
+                text=chunk, results=initial_results, text_separator=text_separator
+            )
+
+        chunk_results = return_allowed_results(
+            initial_results=initial_results,
+            allowed_entities=allowed_entities,
+            allowed_regex_entities=allowed_regex_entities,
+        )
+
+        results.extend(chunk_results)
 
     results.sort(key=lambda x: x.start)
 
@@ -193,7 +211,7 @@ def anonymise(
     regex_entities: Sequence[str | PteredactylRecogniser] = DEFAULT_REGEX_ENTITIES,
     highlight: bool = False,
     replacement_lists: dict | None = None,
-    model_path: str = DEFAULT_NER_MODEL,
+    model_path: str = None,
     spacy_model: str = DEFAULT_SPACY_MODEL,
     language: str = "en",
     mask_individual_words: bool = False,
@@ -212,8 +230,8 @@ def anonymise(
     regex_entities (list, optional): A list of regex entities or PteredactylRecognisers to analyse. If not provided, a default list will be used.
     highlight (bool): If True, highlights the anonymized parts in the text.
     replacement_lists: (dict, optional): A dictionary with entity types as keys and lists of replacement values for hide-in-plain-sight redaction.
-    model_path (str): The path to the model used for analysis (e.g. 'StanfordAIMI/stanford-deidentifier-base'). Used only if analyser not provided.
-    spacy_model (str): The spaCy model to use (e.g. 'en_core_web_sm'). Used only if analyser not provided.
+    model_path (str): The path to the model used for analysis. Used only if analyser not provided.
+    spacy_model (str): The spaCy model to use. Used only if analyser not provided.
     language (str): The language of the text to be analyzed. Defaults to "en". Used only if analyser not provided.
     mask_individual_words (bool): If True, prevents joining of next-door entities together.
             (i.e. Jane Smith becomes <PERSON> <PERSON> if True, or <PERSON> if False). Defaults to False.
@@ -282,17 +300,23 @@ def anonymise(
                 analyser=analyser, regex_entities=regex_entities
             )
 
+    # Chunk the text if it exceeds the maximum length
+    text_chunks = chunk_text(text)
+
     # Analyse the text
-    initial_results = analyse(
-        text,
-        analyser,
-        entities=entities,
-        regex_entities=regex_entities,
-        mask_individual_words=mask_individual_words,
-        text_separator=text_separator,
-        rebuild_regex_recognisers=False,
-        **kwargs,
-    )
+    all_results = []
+    for chunk in text_chunks:
+        initial_results = analyse(
+            chunk,
+            analyser,
+            entities=entities,
+            regex_entities=regex_entities,
+            mask_individual_words=mask_individual_words,
+            text_separator=text_separator,
+            rebuild_regex_recognisers=False,
+            **kwargs,
+        )
+        all_results.extend(initial_results)
 
     # Create an OperatorConfig that randomly selects replacements from the replacement list
     operator_config = None
@@ -312,13 +336,13 @@ def anonymise(
     # if-else is strictly required as the anonymize method modifies initial_results variable when called
     if not mask_individual_words:
         anonymized_result = anonymiser.anonymize(
-            text=text, analyzer_results=initial_results, operators=operator_config
+            text=text, analyzer_results=all_results, operators=operator_config
         )
     else:
         # this is essentially AnonymizerEngine.anonymize without merging adjacent entities of the same type
         # some discussion around merging adjacent entities: https://github.com/microsoft/presidio/issues/1090
         analyzer_results = anonymiser._remove_conflicts_and_get_text_manipulation_data(
-            initial_results, ConflictResolutionStrategy.MERGE_SIMILAR_OR_CONTAINED
+            all_results, ConflictResolutionStrategy.MERGE_SIMILAR_OR_CONTAINED
         )
         operators = anonymiser._AnonymizerEngine__check_or_add_default_operator(
             operator_config
@@ -342,7 +366,7 @@ def anonymise_df(
     highlight: bool = False,
     replacement_lists: dict | None = None,
     inplace: bool = False,
-    model_path: str = DEFAULT_NER_MODEL,
+    model_path: str = None,
     spacy_model: str = DEFAULT_SPACY_MODEL,
     language: str = "en",
     mask_individual_words: bool = False,
@@ -364,8 +388,8 @@ def anonymise_df(
     regex_entities (list, optional): A list of regex entities or PteredactylRecognisers to analyse. If not provided, a default list will be used.
     highlight (bool): If True, highlights the anonymized parts in the text.
     replacement_lists: (dict, optional): A dictionary with entity types as keys and lists of replacement values for hide-in-plain-sight redaction.
-    model_path (str): The path to the model used for analysis (e.g. 'StanfordAIMI/stanford-deidentifier-base'). Used only if analyser not provided.
-    spacy_model (str): The spaCy model to use (e.g. 'en_core_web_sm'). Used only if analyser not provided.
+    model_path (str): The path to the model used for analysis. Used only if analyser not provided.
+    spacy_model (str): The spaCy model to use. Used only if analyser not provided.
     language (str): The language of the text to be analyzed. Defaults to "en". Used only if analyser not provided.
     mask_individual_words (bool): If True, prevents joining of next-door entities together.
             (i.e. Jane Smith becomes <PERSON> <PERSON> if True, or <PERSON> if False). Defaults to False.
