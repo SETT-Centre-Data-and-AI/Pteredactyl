@@ -10,6 +10,6 @@ RUN poetry lock
 
 RUN poetry install
 
-EXPOSE 7800
+EXPOSE 7860
 
 CMD ["poetry", "run", "python", "app.py"]
