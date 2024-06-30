@@ -303,6 +303,10 @@ def redact_and_visualize(text: str, model_name: str):
 
 
 hint = """
+<p align="center">
+  <img src="./assets/img/SETT_Logo.jpg" alt="SETT Logo" />
+</p>
+
 ## Pteredactyl Gradio Webapp and API
 
 Clinical patient identifiable information (cPII) presents a significant challenge in natural language processing (NLP) that has yet to be fully resolved but significant progress is being made [1,2].
@@ -409,4 +413,4 @@ iface = gr.Interface(
     article=hint,
 )
 
-iface.launch()
+iface.launch(server_name="0.0.0.0", server_port=7860)

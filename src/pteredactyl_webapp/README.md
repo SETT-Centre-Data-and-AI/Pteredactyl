@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/img/SETT_Logo.jpg" alt="SETT Logo" />
+</p>
+
 ## Pteredactyl Gradio Webapp and API
 
 - Authors: Matt Stammers🧪, Cai Davis🥼 and Michael George🩺
