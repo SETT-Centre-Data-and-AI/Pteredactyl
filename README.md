@@ -1,6 +1,6 @@
 <picture align="center">
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/SETT_Logo.jpg">
-  <img alt="Pteredactyl_Logo" src="https://github.com/SETT-Centre-Data-and-AI/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/SETT_Logo.jpg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/SETT_Logo.svg">
+  <img alt="Pteredactyl_Logo" src="https://github.com/SETT-Centre-Data-and-AI/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/SETT_Logo.svg">
 </picture>
 
 # Pteredactyl Python Module, Gradio Webapp, API
@@ -85,8 +85,8 @@ We invite the open-source community to collaborate to improve the present result
 ## Logo
 
 <picture align="center">
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg">
-  <img alt="Pteredactyl_Logo" src="https://github.com/SETT-Centre-Data-and-AI/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.svg">
+  <img alt="Pteredactyl_Logo" src="https://github.com/SETT-Centre-Data-and-AI/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.svg">
 </picture>
 
 ### References:
