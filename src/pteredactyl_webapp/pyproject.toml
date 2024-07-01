@@ -1,18 +1,21 @@
 [tool.poetry]
-name = "pteredactyl_api"
-version = "1.0.1"
+name = "pteredactyl_webapp"
+version = "1.0.3"
 description = "Pteredactyl performs free-text redaction and masking of peronally identifiable information (PII) in clinical free text. This uses gradio to deploy it locally either as a webapp or API"
 authors = [
     "Cai Davis", "Michael George", "Matt Stammers"
 ]
 license = "MIT"
 readme = "README.md"
+homepage = "https://mattstammers.github.io/Pteredactyl/"
+repository = "https://github.com/MattStammers/Pteredactyl"
+documentation = "https://mattstammers.github.io/Pteredactyl/"
+keywords = ["NLP", "PII", "redaction", "clinical", "anonymization"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 pteredactyl = "*"
 gradio = "*"
-pyyaml = "*"
 seaborn = "*"
 install = "^1.3.5"
 
