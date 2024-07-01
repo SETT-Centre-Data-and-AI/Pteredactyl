@@ -1,6 +1,7 @@
-<p align="center">
-  <img src="./src/pteredactyl_webapp/assets/img/SETT_Logo.jpg" alt="SETT Logo" />
-</p>
+<picture align="center">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/SETT_Logo.jpg">
+  <img alt="Pteredactyl_Logo" src="https://github.com/SETT-Centre-Data-and-AI/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/SETT_Logo.jpg">
+</picture>
 
 # Pteredactyl Python Module, Gradio Webapp, API
 
@@ -83,10 +84,10 @@ We invite the open-source community to collaborate to improve the present result
 
 ## Logo
 
-<p align="center">
-  <img src="./src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg" alt="SETT Logo" />
-</p>
-
+<picture align="center">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg">
+  <img alt="Pteredactyl_Logo" src="https://github.com/SETT-Centre-Data-and-AI/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg">
+</picture>
 
 ### References:
 1. Chambon PJ, Wu C, Steinkamp JM, Adleberg J, Cook TS, Langlotz CP. Automated deidentification of radiology reports combining transformer and “hide in plain sight” rule-based methods. J Am Med Inform Assoc. 2023 Feb 1;30(2):318–28.

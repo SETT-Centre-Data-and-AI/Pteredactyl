@@ -50,9 +50,10 @@ Pteredactyl was created at University Hospital Southampton NHSFT by the Research
 
 ## Logo
 
-<p align="center">
-  <img src="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg" alt="Pteredactyl Logo" />
-</p>
+<picture align="center">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg">
+  <img alt="Pteredactyl_Logo" src="https://github.com/SETT-Centre-Data-and-AI/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg">
+</picture>
 
 
 # Abstract
@@ -110,9 +111,11 @@ We invite the open-source community to collaborate to improve the present result
 
 ## SETT Logo
 
-<p align="center">
-  <img src="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/SETT_Logo.jpg" alt="SETT Logo" />
-</p>
+<picture align="center">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/SETT_Logo.jpg">
+  <img alt="SETT Logo" src="https://github.com/SETT-Centre-Data-and-AI/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/SETT_Logo.jpg">
+</picture>
+
 
 ### References:
 1. Chambon PJ, Wu C, Steinkamp JM, Adleberg J, Cook TS, Langlotz CP. Automated deidentification of radiology reports combining transformer and “hide in plain sight” rule-based methods. J Am Med Inform Assoc. 2023 Feb 1;30(2):318–28.
