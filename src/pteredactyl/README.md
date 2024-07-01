@@ -51,7 +51,7 @@ Pteredactyl was created at University Hospital Southampton NHSFT by the Research
 ## Logo
 
 <picture align="center">
-  <img alt="Pteredactyl_Logo" src="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg"  width="250">
+  <img alt="Pteredactyl_Logo" src="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/Pteredactyl_Logo.jpg">
 </picture>
 
 # Abstract
@@ -110,7 +110,7 @@ We invite the open-source community to collaborate to improve the present result
 ## SETT Logo
 
 <picture align="center">
-  <img alt="SETT Logo" src="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/SETT_Logo.jpg" width="250">
+  <img alt="SETT Logo" src="https://github.com/MattStammers/Pteredactyl/blob/main/src/pteredactyl_webapp/assets/img/SETT_Logo.jpg">
 </picture>
 
 
