@@ -7,9 +7,8 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+site/
 flagged/
-docs/
-mkdocs.yml
 .Python
 build/
 develop-eggs/
