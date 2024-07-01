@@ -83,7 +83,7 @@ def build_regex_entity_recogniser_list(
     >>> recognisers = build_regex_entity_recogniser_list(['NHS_NUMBER',
     ...                                                    'ENTITY_2',
     ...                                                    PteredactylRecogniser(entity_type='SOUTHAMPTON_LANDLINE',
-    ...                                                                          regex=r'\\b((?:\+44\s?7\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3}|\(?01\d{1,4}\)?\s?\d{1,4}\s?\d{1,4})\\b',
+    ...                                                                          regex=r'\\b((?:\\+44\\s?7\\d{3}|\\(?07\\d{3}\\)?)\\s?\\d{3}\\s?\\d{3}|\\(?01\\d{1,4}\\)?\\s?\\d{1,4}\\s?\\d{1,4})\\b',
     ...                                                                          check_function=check_so_landline
     ...                                                   ])
     """

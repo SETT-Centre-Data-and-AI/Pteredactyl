@@ -5,7 +5,7 @@ site_author: "Matt Stammers, Cai Davis, Michael George"
 site_url: "https://github.com/MattStammers/Pteredactyl"
 
 # Copyright
-copyright: "2024 Pteredactyl"
+copyright: "2024 SETT Data and AI"
 
 # Repository
 repo_name: "Pteredactyl GitHub"
@@ -23,15 +23,16 @@ theme:
     previous: 80 # p
     search: 83 # s
   palette:
-    primary: "blue"
-    accent: "blue"
+    primary: "red"
+    accent: "purple"
   features:
     - tabs
 
 # Extensions
 markdown_extensions:
   - admonition
-  - codehilite
+  - codehilite:
+      guess_lang: false
   - footnotes
   - mdx_math:
       enable_dollar_delimiter: true
@@ -39,11 +40,15 @@ markdown_extensions:
       permalink: true
       separator: "_"
 
+
 plugins:
   - mkdocstrings:
       handlers:
         python:
-          paths: [../src]
+          paths: ["../src"]
+          selection:
+            filters:
+              - "!^_[^_]"
   - search:
       separator: '[\s\-\.]+'
       lang:
@@ -51,9 +56,14 @@ plugins:
 
 # Customization
 extra_javascript:
+  - "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"
+  - "assets/js/custom.js"
   - "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-MML-AM_CHTML"
+
 extra_css:
+  - "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/atom-one-dark.min.css"
   - "assets/css/custom.css"
+
 extra:
   manifest: "manifest.json"
   social:
@@ -65,27 +75,19 @@ extra:
 # Page tree
 nav:
   - Home: index.md
-  - Introduction: introduction.md
-  - Tool Usage Instructions: usage-instructions.md
-  - Python Module: python-module.md
-  - Gradio Web App: gradio-webapp.md
-  - Docker Deployment: docker-deployment.md
-  - Background: background.md
-  - Methods: methods.md
-  - Results: results.md
-  - Strengths: strengths.md
-  - Limitations: limitations.md
-  - Conclusion: conclusion.md
-  - References: references.md
-  - Getting Started:
-      - Python Setup: getting-started/python-setup.md
-      - Installing Clients: getting-started/installing-clients.md
-      - Setting Up Credentials: getting-started/setting-up-credentials.md
-      - First Connection: getting-started/connecting.md
-      - Further Developing the Docs: getting-started/docs-development.md
-  - Extensions:
-      - MathJax: extensions/mathjax.md
-      - Code Hilite: extensions/code-hilite.md
-      - Footnote: extensions/footnote.md
-  - Material for MkDocs: material-for-mkdocs.md
-  - License: license.md
+  - Abstract: abstract.md
+  - Python_Module:
+    - Introduction: Python_Module/landing.md
+    - Quickstart: Python_Module/quickstart.md
+    - Examining Results: Python_Module/examining_results.md
+    - Reusing An Analyser: Python_Module/reusing_an_analyser.md
+    - Selecting Entities To Redact: Python_Module/selecting_entities_to_redact.md
+    - Passing Custom Regex Entities: Python_Module/passing_custom_regex_entities.md
+    - Anonymising DataFrames: Python_Module/anonymising_dataframes.md
+    - Mkdocstrings: Python_Module/mkdocstrings.md
+    - Developing/Contributing: Python_Module/developing-contributing.md
+  - Webapp-API:
+      - Introduction: Webapp-API/introduction.md
+      - Gradio: Webapp-API/gradio.md
+      - Docker: Webapp-API/docker.md
+      - Developing/Contributing: Webapp-API/developing-contributing.md
