@@ -38,7 +38,7 @@ presidio_logger = logging.getLogger("presidio-analyzer")
 
 
 def create_analyser(
-    model_path: str = None,
+    model_path: str = DEFAULT_NER_MODEL,
     spacy_model: str = DEFAULT_SPACY_MODEL,
     language: str = "en",
     regex_entities: Sequence[str | PteredactylRecogniser] = DEFAULT_REGEX_ENTITIES,
@@ -82,7 +82,7 @@ def analyse(
     analyser: AnalyzerEngine | None = None,
     entities: str | list[str] = DEFAULT_ENTITIES,
     regex_entities: Sequence[str | PteredactylRecogniser] = DEFAULT_REGEX_ENTITIES,
-    model_path: str = None,
+    model_path: str = DEFAULT_NER_MODEL,
     spacy_model: str = DEFAULT_SPACY_MODEL,
     language: str = "en",
     mask_individual_words: bool = False,
@@ -178,7 +178,7 @@ def anonymise(
     regex_entities: Sequence[str | PteredactylRecogniser] = DEFAULT_REGEX_ENTITIES,
     highlight: bool = False,
     replacement_lists: dict | None = None,
-    model_path: str = None,
+    model_path: str = DEFAULT_NER_MODEL,
     spacy_model: str = DEFAULT_SPACY_MODEL,
     language: str = "en",
     mask_individual_words: bool = False,
@@ -327,7 +327,7 @@ def anonymise_df(
     highlight: bool = False,
     replacement_lists: dict | None = None,
     inplace: bool = False,
-    model_path: str = None,
+    model_path: str = DEFAULT_NER_MODEL,
     spacy_model: str = DEFAULT_SPACY_MODEL,
     language: str = "en",
     mask_individual_words: bool = False,
