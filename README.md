@@ -12,6 +12,8 @@ Clinical patient identifiable information (cPII) presents a significant challeng
 
 This is why we created [Pteredactyl](https://pypi.org/project/pteredactyl/) - a python module to help with redaction of clinical free text.
 
+Docs are available here [Docs](https://mattstammers.github.io/Pteredactyl/)
+
 ## Tool Usage Instructions
 
 When the input text is entered, the tool redacts the cPII from the entered text using NLP with labelled masking tokens and then assesses the models results. You can test the text against different models by selecting from the dropdown.
